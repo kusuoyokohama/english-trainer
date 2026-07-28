@@ -132,6 +132,30 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
 }
 .done h2{margin:0 0 6px}
 .warn{font-size:.72rem; color:var(--sub); text-align:center; margin:18px 16px 0}
+
+/* ===== ⑤ ふりかえり ===== */
+.rv-top{text-align:center; padding:18px; border-radius:var(--radius); margin:12px 0;
+  background:linear-gradient(135deg,var(--brand),var(--accent)); color:#fff; box-shadow:var(--shadow)}
+.rv-top .big{font-size:2.6rem; font-weight:800; line-height:1.1}
+.rv-top .cap{font-size:.85rem; opacity:.9}
+.rv-bar{display:flex; height:16px; border-radius:99px; overflow:hidden; background:var(--line); margin:14px 0 6px}
+.rv-bar span{display:block; transition:width .4s ease}
+.rv-g{display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:14px;
+  margin:10px 0; background:var(--card); box-shadow:var(--shadow)}
+.rv-g .dot{font-size:1.4rem; line-height:1}
+.rv-g .nm{flex:1; font-weight:700; font-size:1rem}
+.rv-g .ct{font-size:1.5rem; font-weight:800}
+.rv-list{font-size:.85rem; color:var(--sub); margin:-4px 4px 14px; word-break:break-word; line-height:1.8}
+.rv-tabs{font-size:.9rem; line-height:2}
+.rv-tabs b{font-weight:700}
+.rv-out{width:100%; min-height:130px; margin-top:12px; padding:10px; font-size:.75rem;
+  border:1px solid var(--line); border-radius:10px; background:var(--bg); color:var(--ink);
+  font-family:ui-monospace,monospace; -webkit-user-select:all; user-select:all}
+.rv-row{display:flex; gap:8px; flex-wrap:wrap}
+.rv-row .btn{flex:1 1 auto; min-width:44%}
+.banner{max-width:520px; margin:8px auto 0; padding:10px 14px; border-radius:12px;
+  font-size:.8rem; background:color-mix(in srgb,var(--ng) 12%,var(--card)); color:var(--ng);
+  border:1px solid color-mix(in srgb,var(--ng) 30%,var(--card))}
 </style>
 </head>
 <body>
@@ -150,6 +174,7 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
   <button role="tab" aria-selected="false" data-tab="grammar">✏️ 文法</button>
   <button role="tab" aria-selected="false" data-tab="trans">🔁 和訳</button>
   <button role="tab" aria-selected="false" data-tab="listen">🔊 リスニング</button>
+  <button role="tab" aria-selected="false" data-tab="review">📊 ふりかえり</button>
 </nav>
 
 <main>
@@ -215,12 +240,32 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
         <span>🐇</span>
       </div>
       <p class="hint">音を聞いて、口に出してマネしよう（シャドーイング）。</p>
+      <div class="selfcheck" id="lCheck">
+        <button class="btn ghost" id="lNg">もういちど</button>
+        <button class="btn" id="lOk">聞き取れた 🙆</button>
+      </div>
     </div>
     <div class="row">
       <button class="btn ghost small" id="lPrev">← まえ</button>
       <button class="btn ghost small" id="lNext">つぎ →</button>
     </div>
-    <div class="counter"><span id="lIdx">1</span> / <span id="lTotal">5</span></div>
+    <div class="counter"><span id="lIdx">1</span> / <span id="lTotal">5</span>　聞けた <span id="lScore">0</span></div>
+  </section>
+
+  <!-- ⑤ ふりかえり -->
+  <section id="review" class="panel" role="tabpanel">
+    <div id="rvBody"></div>
+    <div class="card">
+      <h3 style="margin:0 0 4px; font-size:1rem">記録の持ち出し・やりなおし</h3>
+      <p class="hint" style="margin-bottom:12px">週に1回「記録をコピー」を押して、送ってください。</p>
+      <div class="rv-row">
+        <button class="btn ghost small" id="rvCopy">📋 記録をコピー</button>
+        <button class="btn ghost small" id="rvPaste">📥 読みこむ</button>
+        <button class="btn ghost small" id="rvReset">🗑 記録を消す</button>
+      </div>
+      <textarea class="rv-out" id="rvText" style="display:none" spellcheck="false" aria-label="記録データ"></textarea>
+      <p class="hint" id="rvMsg" role="status"></p>
+    </div>
   </section>
 
   <p class="warn">※<b>NEW CROWN 1 Lesson 1「About Me」</b>に合わせた教材です。単語は教科書の新出語に準拠し、<b>例文（文法・和訳・リスニング）は著作権に配慮した自作</b>です（教科書本文の複製ではありません）。<br>文字での学習（単語・文法・和訳）は通信なしのオフラインで動きます。音声は端末のブラウザ読み上げ機能を使うため、対応端末でのみ再生されます。</p>
@@ -307,9 +352,226 @@ function applyTtsFallback(){
     '<p class="hint" style="color:var(--ng)">お使いの端末は音声読み上げに未対応です。文字での学習タブはそのまま使えます。</p>');
 }
 
+/* ===== 学習ログ（計測） =====
+   ・記録するもの：項目ID／正誤／かかった秒数／日時
+   ・保存先は端末の中だけ（localStorage）。外部へは一切送信しない
+   ・保存できない端末では計測だけ止め、学習機能は今までどおり動く
+   ・項目IDは配列の順番ではなく「中身」から作るので、DATA を差し替えても記録がズレない */
+const Tracker = (function(){
+  const LESSON = (DATA.meta && DATA.meta.lesson) || 'L1';
+  const KEY    = 'et.v1.' + LESSON;
+
+  /* 「おそい」の暫定しきい値（ミリ秒）。第1週の実測データで見直す前提の初期値 */
+  const SLOW_MS  = {words:6000, grammar:12000, trans:25000, listen:0};
+  /* 速すぎる回答＝考えずにタップした疑い（ミリ秒） */
+  const HASTY_MS = {words:1200, grammar:1200, trans:3000,  listen:0};
+  const AWAY_MS  = 90000; // これを超えたら離席とみなし、秒数は記録しない
+  const TABNAME  = {words:'単語', grammar:'ぶんぽう', trans:'えい作文', listen:'聞きとり'};
+
+  let st = null;      // 記録本体
+  let live = true;    // 保存が使えるか
+  const pend = {};    // いま計測中の問題（タブごとに独立して持つ）
+
+  function now(){ return (window.performance && performance.now) ? performance.now() : Date.now(); }
+  function dayKey(d){ return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+  function blank(){ return {v:1, lesson:LESSON, round:1, items:{}, day:null, dayMs:0, pos:{}}; }
+
+  /* --- 保存層：ここだけ差し替えれば保存先を変えられる --- */
+  function probe(){
+    try{ localStorage.setItem(KEY+'.p','1'); localStorage.removeItem(KEY+'.p'); return true; }
+    catch(e){ return false; }
+  }
+  function load(){
+    try{ const raw = localStorage.getItem(KEY); st = raw ? JSON.parse(raw) : null; }
+    catch(e){ st = null; }
+    if(!st || !st.items) st = blank();
+    if(!st.pos) st.pos = {};
+  }
+  function save(){
+    if(!live) return;
+    try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){ live = false; }
+  }
+
+  /* --- 項目ID・表示名 --- */
+  function idOf(tab, i){
+    const d = DATA[tab][i]; if(!d) return null;
+    return tab.charAt(0) + ':' + (tab==='grammar' ? d.q : tab==='trans' ? d.jp : d.en);
+  }
+  function nameOf(tab, i){
+    const d = DATA[tab][i]; if(!d) return '';
+    return tab==='grammar' ? d.q.replace('___','◯') : tab==='trans' ? d.jp : d.en;
+  }
+
+  /* --- 計測：問題が出た瞬間に start、答えた瞬間に record --- */
+  function start(tab, i){
+    const id = idOf(tab, i);
+    if(id) pend[tab] = {id:id, tab:tab, i:i, t0:now(), away:0, hideAt:0, held:null};
+    else   delete pend[tab];
+  }
+  function cancel(tab){
+    if(tab) delete pend[tab];
+    else for(const k in pend) delete pend[k];
+  }
+  /* 思考時間だけ先に確定させる（和訳の「英文をみる」を押した時点など） */
+  function hold(tab){
+    const p = pend[tab];
+    if(p && p.held===null) p.held = now()-p.t0-p.away;
+  }
+
+  /* 画面を離れていた時間は差し引く（トイレ休憩を「超苦手」にしないため） */
+  document.addEventListener('visibilitychange', function(){
+    for(const k in pend){
+      const p = pend[k];
+      if(document.hidden){ p.hideAt = now(); }
+      else if(p.hideAt){ p.away += now()-p.hideAt; p.hideAt = 0; }
+    }
+  });
+
+  function record(tab, ok, meta){
+    const p = pend[tab];
+    if(!p) return;
+    const raw = p.held!==null ? p.held : (now()-p.t0-p.away);
+    // 離席とみなす場合は -1（＝秒数は無効）。正誤だけは残す
+    const ms = (raw > AWAY_MS || raw < 0) ? -1 : Math.max(1, Math.round(raw));
+    const it = st.items[p.id] || (st.items[p.id] = {tab:p.tab, label:'', a:[]});
+    it.label = nameOf(p.tab, p.i);
+    const rec = {t:Date.now(), ms:ms, ok:!!ok, r:st.round};
+    if(meta && meta.plays) rec.p = meta.plays;
+    it.a.push(rec);
+    if(it.a.length > 12) it.a.shift();  // 直近12件まで（容量対策）
+    rollDay();
+    if(ms > 0) st.dayMs += ms;
+    delete pend[tab];
+    save();
+  }
+
+  /* --- 「おそい」の基準：データが貯まったら本人の中央値に自動で切り替える --- */
+  function slowLimit(tab){
+    const v = [];
+    for(const id in st.items){
+      const it = st.items[id];
+      if(it.tab !== tab) continue;
+      for(let k=0;k<it.a.length;k++) if(it.a[k].ms > 0) v.push(it.a[k].ms);
+    }
+    if(v.length < 8) return SLOW_MS[tab];   // 文法6問などデータ不足なら固定値のまま
+    v.sort(function(a,b){ return a-b; });
+    const m = v.length%2 ? v[(v.length-1)/2] : (v[v.length/2-1]+v[v.length/2])/2;
+    return Math.max(SLOW_MS[tab]*0.6, m*1.6);
+  }
+  function isSlow(tab, rec){
+    if(tab==='listen') return (rec.p||0) >= 3;      // 3回以上聞き直した＝聞き取れていない
+    return rec.ms > 0 && rec.ms > slowLimit(tab);
+  }
+  function isHasty(tab, rec){
+    if(tab==='listen') return false;
+    return rec.ms > 0 && rec.ms < HASTY_MS[tab];
+  }
+
+  /* --- 判定：誤答だけでなく「時間」も見て、たまたま／本当の苦手を分ける --- */
+  function judge(it){
+    if(!it || !it.a.length) return null;
+    const last = it.a[it.a.length-1];
+    const prev = it.a.length>1 ? it.a[it.a.length-2] : null;
+    const lastSlow = isSlow(it.tab, last);
+    if(!last.ok) return isHasty(it.tab, last) ? 'yellow' : 'red'; // 直近で誤答＝要復習
+    if(prev && !prev.ok) return lastSlow ? 'yellow' : 'green';    // 前回の誤りを直せた
+    if(prev && isSlow(it.tab, prev) && lastSlow) return 'yellow'; // 2回とも時間がかかる
+    return lastSlow ? 'yellow' : 'green';
+  }
+  function score(tab, i){
+    const it = st.items[idOf(tab,i)];
+    if(!it || !it.a.length) return 9;   // まだ一度も解いていない＝最優先
+    const g = judge(it);
+    return g==='red' ? 3 : g==='yellow' ? 1 : 0;
+  }
+
+  /* --- 出題順：2周目は「にがて度」の高い順。定着した項目は出さない --- */
+  function queue(tab){
+    const all = [];
+    for(let i=0;i<DATA[tab].length;i++) all.push(i);
+    if(st.round <= 1) return all;
+    const pick = [];
+    for(let i=0;i<all.length;i++){ const s = score(tab,i); if(s>0) pick.push({i:i, s:s}); }
+    pick.sort(function(a,b){ return b.s-a.s; });
+    return pick.length ? pick.map(function(o){ return o.i; }) : all; // 全部バッチリなら軽く全部
+  }
+
+  /* --- 集計 --- */
+  function rollDay(){
+    const k = dayKey(new Date());
+    if(st.day !== k){ st.day = k; st.dayMs = 0; }
+  }
+  function summary(todayOnly){
+    const today = dayKey(new Date());
+    const out = {red:[], yellow:[], green:[], byTab:{}, total:0, todayMin:Math.round(st.dayMs/60000)};
+    for(const k in TABNAME) out.byTab[k] = {name:TABNAME[k], red:0, yellow:0, green:0, n:0};
+    for(const id in st.items){
+      const it = st.items[id];
+      if(todayOnly){
+        let hit = false;
+        for(let k=0;k<it.a.length;k++) if(dayKey(new Date(it.a[k].t))===today){ hit = true; break; }
+        if(!hit) continue;
+      }
+      const g = judge(it);
+      if(!g) continue;
+      out[g].push(it.label);
+      if(out.byTab[it.tab]){ out.byTab[it.tab][g]++; out.byTab[it.tab].n++; }
+      out.total++;
+    }
+    return out;
+  }
+
+  /* --- 持ち出し・読みこみ・リセット --- */
+  function exportText(){
+    const s = summary(false);
+    return [
+      '■ 英語トレ 学習記録  ' + LESSON,
+      '出力: ' + new Date().toLocaleString('ja-JP'),
+      '周回: ' + st.round + '周目 ／ 記録した項目: ' + s.total + ' ／ きょうの学習: 約' + s.todayMin + '分',
+      'もういちど ' + s.red.length + ' ／ あとすこし ' + s.yellow.length + ' ／ バッチリ ' + s.green.length,
+      '',
+      '【もういちど】' + (s.red.join(' / ') || 'なし'),
+      '【あとすこし】' + (s.yellow.join(' / ') || 'なし'),
+      '',
+      '--- ここから下はデータ（消さずにそのまま送ってください） ---',
+      JSON.stringify(st)
+    ].join('\n');
+  }
+  function importText(txt){
+    const a = txt.indexOf('{'), b = txt.lastIndexOf('}');
+    if(a < 0 || b <= a) return false;
+    try{
+      const o = JSON.parse(txt.slice(a, b+1));
+      if(!o || !o.items) return false;
+      st = o; if(!st.pos) st.pos = {}; save(); return true;
+    }catch(e){ return false; }
+  }
+  function reset(){ st = blank(); save(); }
+
+  live = probe();
+  load();
+  rollDay();
+  save();
+
+  return {
+    start:start, cancel:cancel, hold:hold, record:record,
+    queue:queue, judge:judge, summary:summary,
+    exportText:exportText, importText:importText, reset:reset,
+    setPos:function(tab,i){ st.pos[tab]=i; save(); },
+    getPos:function(tab){ return st.pos[tab]|0; },
+    round:function(){ return st.round; },
+    nextRound:function(){ st.round++; st.pos={}; save(); },
+    ok:function(){ return live; },
+    items:function(){ return st.items; }
+  };
+})();
+
 /* ===== 進捗（きょう学習した回数） ===== */
 let progress = 0;
-const GOAL = DATA.words.length + DATA.grammar.length + DATA.trans.length + DATA.listen.length;
+let GOAL = 1;
+function recalcGoal(){
+  GOAL = Math.max(1, wq.length + gq.length + tq.length + lq.length);
+}
 function bump(){
   progress++;
   const pct = Math.min(100, Math.round(progress/GOAL*100));
@@ -317,42 +579,71 @@ function bump(){
   document.getElementById('pnum').textContent = pct+'%';
 }
 
+/* ===== 出題キュー：2周目は1周目の結果で並べ替え＆絞り込みされる ===== */
+let wq = Tracker.queue('words');
+let gq = Tracker.queue('grammar');
+let tq = Tracker.queue('trans');
+let lq = Tracker.queue('listen');
+recalcGoal();
+
 /* ===== タブ切替 ===== */
 const tabs = document.querySelectorAll('#tabs button');
 tabs.forEach(b=>b.addEventListener('click',()=>{
+  // 計測はタブごとに独立しているので、ここでは消さずに移動先だけ測りなおす
   tabs.forEach(x=>x.setAttribute('aria-selected','false'));
   b.setAttribute('aria-selected','true');
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(b.dataset.tab).classList.add('active');
   window.speechSynthesis && window.speechSynthesis.cancel();
+  if(b.dataset.tab === 'review') renderReview(); else resumeTimer(b.dataset.tab);
 }));
+/* タブに戻ってきたら、その画面の問題の計測をやり直す */
+function resumeTimer(tab){
+  if(tab==='cards')   Tracker.start('words', wq[ci]);
+  if(tab==='grammar' && !gAnswered) Tracker.start('grammar', gq[gi]);
+  if(tab==='trans' && document.getElementById('tCheck').style.display==='none') Tracker.start('trans', tq[ti]);
+  if(tab==='listen')  Tracker.start('listen', lq[li]);
+}
 
 /* ===== ① 単語カード ===== */
-let ci = 0; const flash = document.getElementById('flash');
+let ci = Math.min(Tracker.getPos('words'), wq.length-1);
+let cSeen = false;                       // 裏（意味）を見たか＝正誤判定の材料
+const flash = document.getElementById('flash');
 function renderCard(){
-  const w = DATA.words[ci];
+  const w = DATA.words[wq[ci]];
   document.getElementById('fWord').textContent = w.en;
   document.getElementById('fMean').textContent = w.jp;
   document.getElementById('fPos').textContent = w.pos;
   document.getElementById('cIdx').textContent = ci+1;
   flash.classList.remove('flipped');
   flash.setAttribute('aria-pressed','false');
+  cSeen = false;
+  Tracker.start('words', wq[ci]);
 }
-document.getElementById('cTotal').textContent = DATA.words.length;
-function toggleFlash(){ const f=flash.classList.toggle('flipped'); flash.setAttribute('aria-pressed', f?'true':'false'); }
+document.getElementById('cTotal').textContent = wq.length;
+function toggleFlash(){
+  const f = flash.classList.toggle('flipped');
+  if(f) cSeen = true;
+  flash.setAttribute('aria-pressed', f?'true':'false');
+}
 flash.addEventListener('click', e=>{ if(e.target.id!=='fSpk') toggleFlash(); });
 flash.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleFlash(); } });
-document.getElementById('fSpk').addEventListener('click', e=>{ e.stopPropagation(); speak(DATA.words[ci].en); });
-document.getElementById('cNext').addEventListener('click', ()=>{ ci=(ci+1)%DATA.words.length; renderCard(); });
-document.getElementById('cPrev').addEventListener('click', ()=>{ ci=(ci-1+DATA.words.length)%DATA.words.length; renderCard(); });
-document.getElementById('cKnow').addEventListener('click', ()=>{ bump(); ci=(ci+1)%DATA.words.length; renderCard(); });
+document.getElementById('fSpk').addEventListener('click', e=>{ e.stopPropagation(); speak(DATA.words[wq[ci]].en); });
+function goCard(step){ ci=(ci+step+wq.length)%wq.length; Tracker.setPos('words',ci); renderCard(); }
+document.getElementById('cNext').addEventListener('click', ()=>{
+  if(cSeen) Tracker.record('words', false);   // 意味を見てから送った＝あやふや
+  else      Tracker.cancel('words');          // 裏を見ずに飛ばした＝記録しない
+  goCard(1);
+});
+document.getElementById('cPrev').addEventListener('click', ()=>{ Tracker.cancel('words'); goCard(-1); });
+document.getElementById('cKnow').addEventListener('click', ()=>{ Tracker.record('words', true); bump(); goCard(1); });
 renderCard();
 
 /* ===== ② 文法ドリル ===== */
-let gi=0, gScore=0, gAnswered=false;
-document.getElementById('gTotal').textContent = DATA.grammar.length;
+let gi = Math.min(Tracker.getPos('grammar'), gq.length-1), gScore=0, gAnswered=false;
+document.getElementById('gTotal').textContent = gq.length;
 function renderGrammar(){
-  const item = DATA.grammar[gi]; gAnswered=false;
+  const item = DATA.grammar[gq[gi]]; gAnswered=false;
   document.getElementById('gQ').innerHTML = item.q.replace('___','<span class="blank">?</span>');
   document.getElementById('gIdx').textContent = gi+1;
   document.getElementById('gFb').textContent=''; document.getElementById('gFb').className='feedback';
@@ -362,63 +653,206 @@ function renderGrammar(){
     const btn=document.createElement('button'); btn.className='choice'; btn.textContent=c;
     btn.addEventListener('click',()=>{
       if(gAnswered) return; gAnswered=true;
+      const hit = (idx===item.a);
+      Tracker.record('grammar', hit);            // 正誤＋考えていた秒数を記録
       const fb=document.getElementById('gFb');
-      if(idx===item.a){ btn.classList.add('correct'); fb.textContent='せいかい！🎉'; fb.className='feedback ok'; gScore++; document.getElementById('gScore').textContent=gScore; }
+      if(hit){ btn.classList.add('correct'); fb.textContent='せいかい！🎉'; fb.className='feedback ok'; gScore++; document.getElementById('gScore').textContent=gScore; }
       else{ btn.classList.add('wrong'); box.children[item.a].classList.add('correct'); fb.textContent='おしい！正解は「'+item.choices[item.a]+'」'; fb.className='feedback ng'; }
       speak(item.q.replace('___',item.choices[item.a]));
       bump();
-      document.getElementById('gNext').style.display = (gi<DATA.grammar.length-1)?'flex':'none';
-      if(gi===DATA.grammar.length-1){ fb.textContent += '　ぜんぶ終わり！正解 '+gScore+'/'+DATA.grammar.length; }
+      document.getElementById('gNext').style.display = (gi<gq.length-1)?'flex':'none';
+      if(gi===gq.length-1){ fb.textContent += '　ぜんぶ終わり！正解 '+gScore+'/'+gq.length; }
     });
     box.appendChild(btn);
   });
+  Tracker.start('grammar', gq[gi]);
 }
-document.getElementById('gNext').addEventListener('click',()=>{ gi++; renderGrammar(); });
+document.getElementById('gNext').addEventListener('click',()=>{ gi++; Tracker.setPos('grammar',gi); renderGrammar(); });
 renderGrammar();
 
 /* ===== ③ 和訳・英訳（自己採点） ===== */
-let ti=0, tScore=0;
-document.getElementById('tTotal').textContent = DATA.trans.length;
+let ti = Math.min(Tracker.getPos('trans'), tq.length-1), tScore=0;
+document.getElementById('tTotal').textContent = tq.length;
 function renderTrans(){
-  const item=DATA.trans[ti];
+  const item=DATA.trans[tq[ti]];
   document.getElementById('tJp').textContent=item.jp;
   document.getElementById('tIdx').textContent=ti+1;
   const ans=document.getElementById('tAns'); ans.textContent=item.en; ans.classList.remove('show');
   document.getElementById('tShow').style.display='flex';
   document.getElementById('tCheck').style.display='none';
   document.getElementById('tSpk').style.display='none';
+  Tracker.start('trans', tq[ti]);
 }
 document.getElementById('tShow').addEventListener('click',()=>{
+  Tracker.hold('trans');   // ここまでが「頭の中で英文を組み立てていた時間」＝本当の思考時間
   document.getElementById('tAns').classList.add('show');
   document.getElementById('tShow').style.display='none';
   document.getElementById('tCheck').style.display='flex';
   document.getElementById('tSpk').style.display='inline';
-  speak(DATA.trans[ti].en);
+  speak(DATA.trans[tq[ti]].en);
 });
-document.getElementById('tSpk').addEventListener('click',()=>speak(DATA.trans[ti].en));
-function nextTrans(ok){ if(ok){tScore++; document.getElementById('tScore').textContent=tScore;} bump(); ti=(ti+1)%DATA.trans.length; renderTrans(); }
+document.getElementById('tSpk').addEventListener('click',()=>speak(DATA.trans[tq[ti]].en));
+function nextTrans(ok){
+  Tracker.record('trans', ok);
+  if(ok){tScore++; document.getElementById('tScore').textContent=tScore;}
+  bump(); ti=(ti+1)%tq.length; Tracker.setPos('trans',ti); renderTrans();
+}
 document.getElementById('tOk').addEventListener('click',()=>nextTrans(true));
 document.getElementById('tNg').addEventListener('click',()=>nextTrans(false));
 renderTrans();
 
 /* ===== ④ リスニング ===== */
-let li=0;
-document.getElementById('lTotal').textContent = DATA.listen.length;
+let li = Math.min(Tracker.getPos('listen'), lq.length-1), lScore=0, lPlays=0;
+document.getElementById('lTotal').textContent = lq.length;
 function renderListen(){
-  document.getElementById('lEn').textContent=DATA.listen[li].en;
-  document.getElementById('lJp').textContent=DATA.listen[li].jp;
+  document.getElementById('lEn').textContent=DATA.listen[lq[li]].en;
+  document.getElementById('lJp').textContent=DATA.listen[lq[li]].jp;
   document.getElementById('lIdx').textContent=li+1;
+  lPlays = 0;                       // 何回聞き直したか＝聞き取れているかの目安
+  Tracker.start('listen', lq[li]);
 }
 document.getElementById('lPlay').addEventListener('click',()=>{
-  // 音声が実際に鳴った時だけ進捗を進める（非対応端末で進捗だけ進むのを防ぐ）
-  if(speak(DATA.listen[li].en, parseFloat(document.getElementById('lSpeed').value))) bump();
+  // 音声が実際に鳴った時だけ数える（非対応端末で誤カウントしない）
+  if(speak(DATA.listen[lq[li]].en, parseFloat(document.getElementById('lSpeed').value))) lPlays++;
 });
-document.getElementById('lNext').addEventListener('click',()=>{ li=(li+1)%DATA.listen.length; renderListen(); });
-document.getElementById('lPrev').addEventListener('click',()=>{ li=(li-1+DATA.listen.length)%DATA.listen.length; renderListen(); });
+function nextListen(ok){
+  Tracker.record('listen', ok, {plays:lPlays});
+  if(ok){ lScore++; document.getElementById('lScore').textContent=lScore; }
+  bump(); li=(li+1)%lq.length; Tracker.setPos('listen',li); renderListen();
+}
+document.getElementById('lOk').addEventListener('click',()=>nextListen(true));
+document.getElementById('lNg').addEventListener('click',()=>nextListen(false));
+document.getElementById('lNext').addEventListener('click',()=>{ Tracker.cancel('listen'); li=(li+1)%lq.length; Tracker.setPos('listen',li); renderListen(); });
+document.getElementById('lPrev').addEventListener('click',()=>{ Tracker.cancel('listen'); li=(li-1+lq.length)%lq.length; Tracker.setPos('listen',li); renderListen(); });
 renderListen();
 
-/* ===== 起動時：音声非対応端末のフォールバックを適用 ===== */
+/* ===== ⑤ ふりかえり：きょう弱かったところを1画面で ===== */
+function esc(t){ return String(t).replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; }); }
+function renderReview(){
+  const s = Tracker.summary(true);           // きょう学習した項目だけを対象にする
+  const box = document.getElementById('rvBody');
+  const tot = s.red.length + s.yellow.length + s.green.length;
+  if(!tot){
+    box.innerHTML = '<div class="card" style="text-align:center">きょうはまだ学習していません。<br>'
+      + '<span class="hint">上のタブをえらんで、はじめよう！</span></div>';
+    return;
+  }
+  const pc = function(n){ return Math.round(n/tot*100); };
+  const grp = function(dot, nm, arr){
+    let x = '<div class="rv-g"><span class="dot">'+dot+'</span><span class="nm">'+nm+'</span>'
+          + '<span class="ct">'+arr.length+'</span></div>';
+    if(arr.length){
+      x += '<p class="rv-list">' + arr.slice(0,14).map(esc).join(' ／ ')
+         + (arr.length>14 ? ' …ほか'+(arr.length-14)+'こ' : '') + '</p>';
+    }
+    return x;
+  };
+
+  let h = '<div class="rv-top"><div class="big">'+tot+'</div>'
+        + '<div class="cap">こ の もんだいを やったよ（約'+s.todayMin+'分）</div></div>'
+        + '<div class="rv-bar">'
+        + '<span style="width:'+pc(s.green.length)+'%;background:var(--ok)"></span>'
+        + '<span style="width:'+pc(s.yellow.length)+'%;background:var(--accent)"></span>'
+        + '<span style="width:'+pc(s.red.length)+'%;background:var(--ng)"></span></div>';
+  h += grp('🔴','もういちど', s.red);
+  h += grp('🟡','あとすこし', s.yellow);
+  h += grp('🟢','バッチリ',   s.green);
+
+  let t = '';
+  for(const k in s.byTab){
+    const b = s.byTab[k];
+    if(!b.n) continue;
+    t += (b.red ? '🔴' : b.yellow ? '🟡' : '🟢') + ' <b>'+b.name+'</b>　'
+       + 'バッチリ '+b.green+' ／ あとすこし '+b.yellow+' ／ もういちど '+b.red+'<br>';
+  }
+  if(t) h += '<div class="card"><div class="rv-tabs">'+t+'</div></div>';
+
+  if(s.todayMin >= 25){
+    h += '<div class="card" style="text-align:center"><b>きょうはよくがんばった！ 🎉</b><br>'
+       + '<span class="hint">ここまでにして、つづきはあしたにしよう。とちゅうから再開できます。</span></div>';
+  }
+  if(Tracker.round() === 1){
+    h += '<div class="card"><button class="btn" id="rvRound">2周目をはじめる（にがてだけ）</button>'
+       + '<p class="hint">1周目でつまずいたところだけを、にがてな順に出します。</p></div>';
+  }
+  box.innerHTML = h;
+  const rb = document.getElementById('rvRound');
+  if(rb) rb.addEventListener('click', startNextRound);
+}
+
+/* 2周目：1周目の結果でしぼりこんで出しなおす */
+function startNextRound(){
+  Tracker.nextRound();
+  wq = Tracker.queue('words');  gq = Tracker.queue('grammar');
+  tq = Tracker.queue('trans');  lq = Tracker.queue('listen');
+  recalcGoal();
+  progress = 0;
+  document.getElementById('pbar').style.width = '0%';
+  document.getElementById('pnum').textContent = '0';
+  ci=0; gi=0; ti=0; li=0; gScore=0; tScore=0; lScore=0;
+  document.getElementById('gScore').textContent='0';
+  document.getElementById('tScore').textContent='0';
+  document.getElementById('lScore').textContent='0';
+  document.getElementById('cTotal').textContent = wq.length;
+  document.getElementById('gTotal').textContent = gq.length;
+  document.getElementById('tTotal').textContent = tq.length;
+  document.getElementById('lTotal').textContent = lq.length;
+  renderCard(); renderGrammar(); renderTrans(); renderListen();
+  Tracker.cancel();
+  renderReview();
+}
+
+/* ===== 記録の持ち出し・読みこみ・けす ===== */
+const rvText = document.getElementById('rvText'), rvMsg = document.getElementById('rvMsg');
+function say(m){ rvMsg.textContent = m; }
+document.getElementById('rvCopy').addEventListener('click', function(){
+  const txt = Tracker.exportText();
+  rvText.style.display = 'block'; rvText.value = txt;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt)
+      .then(function(){ say('コピーしました！ そのまま貼りつけて送れます。'); })
+      .catch(function(){ rvText.select(); say('下のわくを長おし →「すべてを選択」→「コピー」してください。'); });
+  }else{
+    rvText.select(); say('下のわくを長おし →「すべてを選択」→「コピー」してください。');
+  }
+});
+document.getElementById('rvPaste').addEventListener('click', function(){
+  if(rvText.style.display === 'none'){
+    rvText.style.display='block'; rvText.value=''; rvText.focus();
+    say('前にコピーした記録を下のわくに貼りつけて、もう一度「読みこむ」を押してください。');
+    return;
+  }
+  if(!rvText.value.trim()){ say('わくが空です。記録を貼りつけてください。'); return; }
+  if(Tracker.importText(rvText.value)){
+    say('読みこみました。画面を作りなおします…');
+    setTimeout(function(){ location.reload(); }, 600);
+  }else{
+    say('読みこめませんでした。コピーした文を、切らずにぜんぶ貼りつけてください。');
+  }
+});
+let resetArm = false, resetTimer = 0;
+document.getElementById('rvReset').addEventListener('click', function(){
+  const b = document.getElementById('rvReset');
+  if(!resetArm){
+    resetArm = true; b.textContent = '⚠️ 本当に消す？';
+    say('消すと元にもどせません。先に「記録をコピー」で保存できます。10秒いないにもう一度押すと消えます。');
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(function(){ resetArm=false; b.textContent='🗑 記録を消す'; say(''); }, 10000);
+    return;
+  }
+  clearTimeout(resetTimer); resetArm = false;
+  Tracker.reset(); say('消しました。画面を作りなおします…');
+  setTimeout(function(){ location.reload(); }, 600);
+});
+
+/* ===== 起動時 ===== */
 applyTtsFallback();
+if(!Tracker.ok()){
+  // 記録が残らない端末では、黙って失敗させずに理由と対処を出す
+  document.querySelector('header').insertAdjacentHTML('afterend',
+    '<p class="banner">⚠️ この開き方では学習記録が残りません。おわったら「📊 ふりかえり」→「記録をコピー」で保存してください。</p>');
+}
+renderReview();
 </script>
 </body>
 </html>
