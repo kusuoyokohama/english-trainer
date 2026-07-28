@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#4f7cff">
+<!-- 家族限定・検索避け：検索エンジンにインデックスさせない -->
+<meta name="robots" content="noindex, nofollow">
+<title>英語トレ｜中1 Lesson 1 About Me</title>
+<style>
+/* ===== デザイントークン（ライト/ダーク両対応） ===== */
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1b2333; --sub:#5b6478;
+  --brand:#4f7cff; --brand-ink:#ffffff; --accent:#ff8a3d;
+  --ok:#22a06b; --ng:#e5484d; --line:#e6e9f2;
+  --shadow:0 6px 20px rgba(27,35,51,.08);
+  --radius:18px; --tap:56px; /* タップ最小領域56px（子ども指でも押しやすく） */
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#11151f; --card:#1a2030; --ink:#eef1f8; --sub:#9aa3b8;
+    --brand:#6b93ff; --brand-ink:#0b0f18; --accent:#ffa15c;
+    --ok:#3ecf8e; --ng:#ff6b6f; --line:#2a3346;
+    --shadow:0 6px 20px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  background:var(--bg); color:var(--ink);
+  line-height:1.6; padding:env(safe-area-inset-top) 0 0;
+  -webkit-text-size-adjust:100%;
+}
+/* ===== ヘッダー ===== */
+header{
+  text-align:center; padding:16px 16px 8px;
+}
+header h1{font-size:1.15rem; margin:0 0 4px; letter-spacing:.02em}
+header .unit{font-size:.82rem; color:var(--sub)}
+.progress{
+  margin:10px auto 0; max-width:520px; padding:0 16px;
+  display:flex; align-items:center; gap:10px; font-size:.78rem; color:var(--sub);
+}
+.progress .bar{flex:1; height:8px; background:var(--line); border-radius:99px; overflow:hidden}
+.progress .bar > i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--brand),var(--accent)); transition:width .4s ease}
+/* ===== タブ ===== */
+nav{
+  position:sticky; top:0; z-index:10; background:var(--bg);
+  padding:10px 8px; display:flex; gap:6px; overflow-x:auto; scrollbar-width:none;
+  max-width:520px; margin:6px auto 0;
+}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  flex:0 0 auto; min-height:44px; padding:8px 14px; border:none; border-radius:99px;
+  background:var(--card); color:var(--sub); font-size:.9rem; font-weight:600;
+  box-shadow:var(--shadow); cursor:pointer; transition:.2s;
+}
+nav button[aria-selected="true"]{background:var(--brand); color:var(--brand-ink)}
+/* ===== 画面共通 ===== */
+main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
+.panel{display:none; animation:fade .25s ease}
+.panel.active{display:block}
+@keyframes fade{from{opacity:0; transform:translateY(6px)}to{opacity:1; transform:none}}
+.card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin:12px 0}
+.hint{font-size:.8rem; color:var(--sub); margin:4px 2px 0}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:var(--tap); padding:0 20px; border:none; border-radius:14px;
+  background:var(--brand); color:var(--brand-ink); font-size:1rem; font-weight:700;
+  cursor:pointer; transition:transform .08s ease, filter .2s; width:100%;
+}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent; color:var(--brand); border:2px solid var(--line)}
+.btn.small{width:auto; min-height:44px; padding:0 14px; font-size:.9rem}
+.row{display:flex; gap:10px}
+.spk{background:none; border:none; cursor:pointer; font-size:1.4rem; padding:8px; line-height:1; color:var(--brand)}
+.counter{text-align:center; font-size:.82rem; color:var(--sub); margin-top:6px}
+
+/* ===== ①単語カード ===== */
+.flash{
+  perspective:1200px; margin:8px 0 4px;
+}
+.flash .inner{
+  position:relative; width:100%; min-height:210px; cursor:pointer;
+  transition:transform .5s; transform-style:preserve-3d;
+}
+.flash.flipped .inner{transform:rotateY(180deg)}
+.flash .face{
+  position:absolute; inset:0; backface-visibility:hidden;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;
+  background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px;
+}
+.flash .face.back{transform:rotateY(180deg); background:linear-gradient(135deg,var(--brand),var(--accent)); color:#fff}
+.flash .word{font-size:2.2rem; font-weight:800; letter-spacing:.01em}
+.flash .mean{font-size:1.6rem; font-weight:700}
+.flash .pos{font-size:.8rem; opacity:.7}
+
+/* ===== ②文法ドリル / ③和訳 の選択肢 ===== */
+.q{font-size:1.15rem; font-weight:700; margin:0 0 14px}
+.q .blank{color:var(--brand); border-bottom:2px dashed var(--brand); padding:0 18px}
+.choices{display:grid; gap:10px}
+.choice{
+  min-height:var(--tap); border:2px solid var(--line); background:var(--card);
+  border-radius:14px; font-size:1.05rem; font-weight:600; color:var(--ink); cursor:pointer; transition:.15s;
+}
+.choice:active{transform:scale(.98)}
+.choice.correct{border-color:var(--ok); background:color-mix(in srgb,var(--ok) 14%,var(--card)); color:var(--ok)}
+.choice.wrong{border-color:var(--ng); background:color-mix(in srgb,var(--ng) 14%,var(--card)); color:var(--ng)}
+.feedback{margin-top:14px; font-weight:700; text-align:center; min-height:1.6em}
+.feedback.ok{color:var(--ok)} .feedback.ng{color:var(--ng)}
+
+/* ===== ③和訳の答え表示 ===== */
+.jp{font-size:1.15rem; font-weight:700; margin-bottom:10px}
+.answer{
+  margin-top:12px; padding:14px; border-radius:12px; background:color-mix(in srgb,var(--brand) 8%,var(--card));
+  border:1px dashed var(--line); font-size:1.05rem; display:none;
+}
+.answer.show{display:block; animation:fade .2s}
+.selfcheck{display:flex; gap:10px; margin-top:12px}
+.selfcheck .btn{font-size:.95rem}
+
+/* ===== ④リスニング ===== */
+.listen .sentence{font-size:1.25rem; font-weight:700; margin:6px 0 2px}
+.listen .sjp{font-size:.9rem; color:var(--sub); margin-bottom:14px}
+.speedrow{display:flex; align-items:center; gap:10px; margin-top:10px; font-size:.85rem; color:var(--sub)}
+.speedrow input{flex:1}
+
+.done{
+  text-align:center; padding:28px 20px; background:linear-gradient(135deg,var(--brand),var(--accent));
+  color:#fff; border-radius:var(--radius); box-shadow:var(--shadow); margin-top:8px;
+}
+.done h2{margin:0 0 6px}
+.warn{font-size:.72rem; color:var(--sub); text-align:center; margin:18px 16px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>英語トレ 🌱</h1>
+  <div class="unit">中1 NEW CROWN 1 Lesson 1：About Me（be動詞・一般動詞・What）</div>
+  <div class="progress">
+    <span>きょうの学習</span>
+    <div class="bar"><i id="pbar"></i></div>
+    <span id="pnum">0</span>
+  </div>
+</header>
+
+<nav id="tabs" role="tablist" aria-label="学習メニュー">
+  <button role="tab" aria-selected="true"  data-tab="cards">🃏 単語</button>
+  <button role="tab" aria-selected="false" data-tab="grammar">✏️ 文法</button>
+  <button role="tab" aria-selected="false" data-tab="trans">🔁 和訳</button>
+  <button role="tab" aria-selected="false" data-tab="listen">🔊 リスニング</button>
+</nav>
+
+<main>
+  <!-- ① 単語カード -->
+  <section id="cards" class="panel active" role="tabpanel">
+    <div class="flash" id="flash" role="button" tabindex="0" aria-label="単語カード。押すと日本語の意味を表示します" aria-pressed="false">
+      <div class="inner">
+        <div class="face front">
+          <div class="word" id="fWord">this</div>
+          <div class="pos" id="fPos">代名詞</div>
+          <button class="spk" id="fSpk" aria-label="発音を聞く">🔊</button>
+        </div>
+        <div class="face back">
+          <div class="mean" id="fMean">これ</div>
+          <div class="pos">タップでもどる</div>
+        </div>
+      </div>
+    </div>
+    <p class="hint">カードをタップで裏返し／🔊で発音。中1の単語を英→日で覚えます。</p>
+    <div class="row" style="margin-top:12px">
+      <button class="btn ghost small" id="cPrev">← まえ</button>
+      <button class="btn" id="cKnow">おぼえた 👍</button>
+      <button class="btn ghost small" id="cNext">つぎ →</button>
+    </div>
+    <div class="counter"><span id="cIdx">1</span> / <span id="cTotal">8</span></div>
+  </section>
+
+  <!-- ② 文法ドリル -->
+  <section id="grammar" class="panel" role="tabpanel">
+    <div class="card">
+      <p class="q" id="gQ"></p>
+      <div class="choices" id="gChoices"></div>
+      <div class="feedback" id="gFb"></div>
+    </div>
+    <button class="btn" id="gNext" style="display:none">つぎの問題 →</button>
+    <div class="counter"><span id="gIdx">1</span> / <span id="gTotal">5</span>　正解 <span id="gScore">0</span></div>
+  </section>
+
+  <!-- ③ 和訳・英訳 -->
+  <section id="trans" class="panel" role="tabpanel">
+    <div class="card">
+      <div class="jp" id="tJp"></div>
+      <button class="spk" id="tSpk" aria-label="英文を聞く" style="display:none">🔊</button>
+      <button class="btn ghost" id="tShow">英文をみる 👀</button>
+      <div class="answer" id="tAns"></div>
+      <div class="selfcheck" id="tCheck" style="display:none">
+        <button class="btn ghost" id="tNg">まちがえた</button>
+        <button class="btn" id="tOk">できた 🙆</button>
+      </div>
+    </div>
+    <div class="counter"><span id="tIdx">1</span> / <span id="tTotal">5</span>　できた <span id="tScore">0</span></div>
+  </section>
+
+  <!-- ④ リスニング -->
+  <section id="listen" class="panel listen" role="tabpanel">
+    <div class="card">
+      <div class="sentence" id="lEn"></div>
+      <div class="sjp" id="lJp"></div>
+      <button class="btn" id="lPlay">▶️ 聞く</button>
+      <div class="speedrow">
+        <span>🐢</span>
+        <input type="range" id="lSpeed" min="0.5" max="1" step="0.1" value="0.8" aria-label="読み上げ速度">
+        <span>🐇</span>
+      </div>
+      <p class="hint">音を聞いて、口に出してマネしよう（シャドーイング）。</p>
+    </div>
+    <div class="row">
+      <button class="btn ghost small" id="lPrev">← まえ</button>
+      <button class="btn ghost small" id="lNext">つぎ →</button>
+    </div>
+    <div class="counter"><span id="lIdx">1</span> / <span id="lTotal">5</span></div>
+  </section>
+
+  <p class="warn">※<b>NEW CROWN 1 Lesson 1「About Me」</b>に合わせた教材です。単語は教科書の新出語に準拠し、<b>例文（文法・和訳・リスニング）は著作権に配慮した自作</b>です（教科書本文の複製ではありません）。<br>文字での学習（単語・文法・和訳）は通信なしのオフラインで動きます。音声は端末のブラウザ読み上げ機能を使うため、対応端末でのみ再生されます。</p>
+</main>
+
+<script>
+/* ===== NEW CROWN 1 Lesson 1「About Me」準拠データ =====
+   ・words: 教科書の新出語(New Words)に準拠。発音しやすい形に整形
+   ・grammar/trans/listen: 著作権配慮のため教科書本文の複製ではなく、
+     同じ単語・文型を使った自作の例文にしている
+   ★ここを差し替えれば他のレッスンにも対応できます★ */
+const DATA = {
+  words: [
+    {en:"hi",          jp:"やあ・こんにちは",             pos:"あいさつ"},
+    {en:"I",           jp:"わたしは",                     pos:"代名詞"},
+    {en:"am",          jp:"〜です（be動詞）",             pos:"be動詞"},
+    {en:"like",        jp:"〜が好きだ",                   pos:"動詞"},
+    {en:"play",        jp:"（スポーツを）する・演奏する", pos:"動詞"},
+    {en:"soccer",      jp:"サッカー",                     pos:"名詞"},
+    {en:"sports",      jp:"スポーツ",                     pos:"名詞"},
+    {en:"English",     jp:"英語",                         pos:"名詞"},
+    {en:"often",       jp:"よく・しばしば",               pos:"副詞"},
+    {en:"watch",       jp:"（じっと）見る",               pos:"動詞"},
+    {en:"read",        jp:"読む",                         pos:"動詞"},
+    {en:"books",       jp:"本",                           pos:"名詞"},
+    {en:"meet",        jp:"会う",                         pos:"動詞"},
+    {en:"too",         jp:"〜もまた",                     pos:"副詞"},
+    {en:"club",        jp:"クラブ・部活動",               pos:"名詞"},
+    {en:"school",      jp:"学校",                         pos:"名詞"},
+    {en:"dance",       jp:"おどる・ダンス",               pos:"動詞・名詞"},
+    {en:"after school",jp:"放課後",                       pos:"連語"},
+    {en:"practice",    jp:"練習する",                     pos:"動詞"},
+    {en:"every day",   jp:"毎日",                         pos:"連語"},
+    {en:"what",        jp:"何・何を",                     pos:"疑問詞"},
+    {en:"animals",     jp:"動物",                         pos:"名詞"},
+    {en:"look at",     jp:"〜を見る",                     pos:"連語"},
+    {en:"pet",         jp:"ペット",                       pos:"名詞"},
+    {en:"have",        jp:"飼っている・持っている",       pos:"動詞"},
+    {en:"weekends",    jp:"週末",                         pos:"名詞"},
+    {en:"at home",     jp:"家で",                         pos:"連語"},
+  ],
+  grammar: [ // Lesson1の文法：be動詞(am/are)・一般動詞の疑問/否定(do)・What疑問文
+    {q:"I ___ Tanaka Hana.",                      choices:["am","are","do"],   a:0},
+    {q:"___ you like soccer?",                    choices:["Are","Am","Do"],   a:2},
+    {q:"___ you a soccer fan?",                   choices:["Do","Are","Am"],   a:1},
+    {q:"I ___ not play tennis.",                  choices:["am","are","do"],   a:2},
+    {q:"___ do you do after school?",             choices:["What","Are","Am"], a:0},
+    {q:"Do you practice every day? — Yes, I ___.",choices:["am","do","are"],   a:1},
+  ],
+  trans: [ // 和文 → 英文（自己採点）。Lesson1の語彙・文型を使った自作例文
+    {jp:"わたしはサッカーが好きです。",  en:"I like soccer."},
+    {jp:"あなたは放課後おどりますか。",  en:"Do you dance after school?"},
+    {jp:"あなたは動物が好きですか。",    en:"Do you like animals?"},
+    {jp:"あなたは何を見ますか。",        en:"What do you watch?"},
+    {jp:"わたしは毎日練習します。",      en:"I practice every day."},
+  ],
+  listen: [ // Lesson1の語彙・文型を使った自作例文
+    {en:"Hi, I am Hana.",               jp:"やあ、わたしはハナです。"},
+    {en:"I like sports and music.",     jp:"わたしはスポーツと音楽が好きです。"},
+    {en:"Do you play soccer?",          jp:"あなたはサッカーをしますか。"},
+    {en:"What animals do you like?",    jp:"あなたはどんな動物が好きですか。"},
+    {en:"I often watch movies at home.",jp:"わたしはよく家で映画を見ます。"},
+  ],
+};
+
+/* ===== 音声（Web Speech API）：端末の読み上げで英語を発音 =====
+   非対応端末では false を返す（呼び出し側で進捗を進めない等の分岐に使う） */
+const TTS_OK = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
+function speak(text, rate){
+  if(!TTS_OK){ return false; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = rate || 0.9;
+  window.speechSynthesis.speak(u);
+  return true;
+}
+/* 起動時に音声非対応なら、🔊系ボタンを無効化して理由を明示（無言の故障を防ぐ） */
+function applyTtsFallback(){
+  if(TTS_OK) return;
+  document.querySelectorAll('.spk').forEach(b=>{ b.disabled=true; b.style.opacity='.35'; b.title='この端末は音声読み上げに対応していません'; });
+  const lp=document.getElementById('lPlay');
+  lp.disabled=true; lp.style.opacity='.5'; lp.textContent='🔇 この端末は音声に非対応';
+  document.getElementById('lEn').insertAdjacentHTML('afterend',
+    '<p class="hint" style="color:var(--ng)">お使いの端末は音声読み上げに未対応です。文字での学習タブはそのまま使えます。</p>');
+}
+
+/* ===== 進捗（きょう学習した回数） ===== */
+let progress = 0;
+const GOAL = DATA.words.length + DATA.grammar.length + DATA.trans.length + DATA.listen.length;
+function bump(){
+  progress++;
+  const pct = Math.min(100, Math.round(progress/GOAL*100));
+  document.getElementById('pbar').style.width = pct+'%';
+  document.getElementById('pnum').textContent = pct+'%';
+}
+
+/* ===== タブ切替 ===== */
+const tabs = document.querySelectorAll('#tabs button');
+tabs.forEach(b=>b.addEventListener('click',()=>{
+  tabs.forEach(x=>x.setAttribute('aria-selected','false'));
+  b.setAttribute('aria-selected','true');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(b.dataset.tab).classList.add('active');
+  window.speechSynthesis && window.speechSynthesis.cancel();
+}));
+
+/* ===== ① 単語カード ===== */
+let ci = 0; const flash = document.getElementById('flash');
+function renderCard(){
+  const w = DATA.words[ci];
+  document.getElementById('fWord').textContent = w.en;
+  document.getElementById('fMean').textContent = w.jp;
+  document.getElementById('fPos').textContent = w.pos;
+  document.getElementById('cIdx').textContent = ci+1;
+  flash.classList.remove('flipped');
+  flash.setAttribute('aria-pressed','false');
+}
+document.getElementById('cTotal').textContent = DATA.words.length;
+function toggleFlash(){ const f=flash.classList.toggle('flipped'); flash.setAttribute('aria-pressed', f?'true':'false'); }
+flash.addEventListener('click', e=>{ if(e.target.id!=='fSpk') toggleFlash(); });
+flash.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleFlash(); } });
+document.getElementById('fSpk').addEventListener('click', e=>{ e.stopPropagation(); speak(DATA.words[ci].en); });
+document.getElementById('cNext').addEventListener('click', ()=>{ ci=(ci+1)%DATA.words.length; renderCard(); });
+document.getElementById('cPrev').addEventListener('click', ()=>{ ci=(ci-1+DATA.words.length)%DATA.words.length; renderCard(); });
+document.getElementById('cKnow').addEventListener('click', ()=>{ bump(); ci=(ci+1)%DATA.words.length; renderCard(); });
+renderCard();
+
+/* ===== ② 文法ドリル ===== */
+let gi=0, gScore=0, gAnswered=false;
+document.getElementById('gTotal').textContent = DATA.grammar.length;
+function renderGrammar(){
+  const item = DATA.grammar[gi]; gAnswered=false;
+  document.getElementById('gQ').innerHTML = item.q.replace('___','<span class="blank">?</span>');
+  document.getElementById('gIdx').textContent = gi+1;
+  document.getElementById('gFb').textContent=''; document.getElementById('gFb').className='feedback';
+  document.getElementById('gNext').style.display='none';
+  const box = document.getElementById('gChoices'); box.innerHTML='';
+  item.choices.forEach((c,idx)=>{
+    const btn=document.createElement('button'); btn.className='choice'; btn.textContent=c;
+    btn.addEventListener('click',()=>{
+      if(gAnswered) return; gAnswered=true;
+      const fb=document.getElementById('gFb');
+      if(idx===item.a){ btn.classList.add('correct'); fb.textContent='せいかい！🎉'; fb.className='feedback ok'; gScore++; document.getElementById('gScore').textContent=gScore; }
+      else{ btn.classList.add('wrong'); box.children[item.a].classList.add('correct'); fb.textContent='おしい！正解は「'+item.choices[item.a]+'」'; fb.className='feedback ng'; }
+      speak(item.q.replace('___',item.choices[item.a]));
+      bump();
+      document.getElementById('gNext').style.display = (gi<DATA.grammar.length-1)?'flex':'none';
+      if(gi===DATA.grammar.length-1){ fb.textContent += '　ぜんぶ終わり！正解 '+gScore+'/'+DATA.grammar.length; }
+    });
+    box.appendChild(btn);
+  });
+}
+document.getElementById('gNext').addEventListener('click',()=>{ gi++; renderGrammar(); });
+renderGrammar();
+
+/* ===== ③ 和訳・英訳（自己採点） ===== */
+let ti=0, tScore=0;
+document.getElementById('tTotal').textContent = DATA.trans.length;
+function renderTrans(){
+  const item=DATA.trans[ti];
+  document.getElementById('tJp').textContent=item.jp;
+  document.getElementById('tIdx').textContent=ti+1;
+  const ans=document.getElementById('tAns'); ans.textContent=item.en; ans.classList.remove('show');
+  document.getElementById('tShow').style.display='flex';
+  document.getElementById('tCheck').style.display='none';
+  document.getElementById('tSpk').style.display='none';
+}
+document.getElementById('tShow').addEventListener('click',()=>{
+  document.getElementById('tAns').classList.add('show');
+  document.getElementById('tShow').style.display='none';
+  document.getElementById('tCheck').style.display='flex';
+  document.getElementById('tSpk').style.display='inline';
+  speak(DATA.trans[ti].en);
+});
+document.getElementById('tSpk').addEventListener('click',()=>speak(DATA.trans[ti].en));
+function nextTrans(ok){ if(ok){tScore++; document.getElementById('tScore').textContent=tScore;} bump(); ti=(ti+1)%DATA.trans.length; renderTrans(); }
+document.getElementById('tOk').addEventListener('click',()=>nextTrans(true));
+document.getElementById('tNg').addEventListener('click',()=>nextTrans(false));
+renderTrans();
+
+/* ===== ④ リスニング ===== */
+let li=0;
+document.getElementById('lTotal').textContent = DATA.listen.length;
+function renderListen(){
+  document.getElementById('lEn').textContent=DATA.listen[li].en;
+  document.getElementById('lJp').textContent=DATA.listen[li].jp;
+  document.getElementById('lIdx').textContent=li+1;
+}
+document.getElementById('lPlay').addEventListener('click',()=>{
+  // 音声が実際に鳴った時だけ進捗を進める（非対応端末で進捗だけ進むのを防ぐ）
+  if(speak(DATA.listen[li].en, parseFloat(document.getElementById('lSpeed').value))) bump();
+});
+document.getElementById('lNext').addEventListener('click',()=>{ li=(li+1)%DATA.listen.length; renderListen(); });
+document.getElementById('lPrev').addEventListener('click',()=>{ li=(li-1+DATA.listen.length)%DATA.listen.length; renderListen(); });
+renderListen();
+
+/* ===== 起動時：音声非対応端末のフォールバックを適用 ===== */
+applyTtsFallback();
+</script>
+</body>
+</html>
