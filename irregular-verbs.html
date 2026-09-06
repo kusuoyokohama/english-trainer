@@ -198,11 +198,14 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
         </div>
       </div>
     </div>
-    <p class="hint">カードをタップで うら返し。原形 →「過去形・ing形・意味」を おぼえよう。</p>
+    <p class="hint">まず 頭の中で 答えてから、カードをタップして たしかめよう。</p>
+    <div class="selfcheck" id="cCheck" style="display:none">
+      <button class="btn ghost" id="cNg">言えなかった</button>
+      <button class="btn" id="cOk">言えた 🙆</button>
+    </div>
     <div class="row" style="margin-top:12px">
       <button class="btn ghost small" id="cPrev">← まえ</button>
-      <button class="btn" id="cKnow">おぼえた 👍</button>
-      <button class="btn ghost small" id="cNext">つぎ →</button>
+      <button class="btn ghost small" id="cNext">とばす →</button>
     </div>
     <div class="counter"><span id="cIdx">1</span> / <span id="cTotal">8</span></div>
   </section>
@@ -323,8 +326,9 @@ const VERBS = [
   {base:"write", past:"wrote",   ing:"writing",  jp:"（〜を）書く"},
 ];
 
-/* 1日にやる語数。39語を一度にやると30分を超えるため、20語ずつ2日で1周する */
-const DAILY = 20;
+/* 1日にやる語数。最後まで終わる量にすることを優先し、10語ずつにしている
+   （20語=86問だと途中で集中が切れて連打で流されることが実データで分かったため） */
+const DAILY = 10;
 
 /* --- まちがい選択肢づくり（よくある間違いを選択肢にすると練習になる） --- */
 // 規則変化のつもりで間違えた形（bring→bringed）。いちばん多い間違い
@@ -355,7 +359,7 @@ const DATA = {
   meta: {lesson:"IV"},   // Lesson 1 とは保存キーを分け、記録が混ざらないようにする
   // ① 活用カード：表=原形 ／ 裏=過去形・ing形・意味
   words: VERBS.map(function(v){
-    return {en:v.base, jp:v.past, pos:"どうし", back:v.ing+"　／　"+v.jp, base:v.base};
+    return {en:v.base, jp:v.past, pos:"過去形・ing形は？", back:v.ing+"　／　"+v.jp, base:v.base};
   }),
   // ② かたちクイズ：1語につき「過去形」「ing形」の2問
   grammar: VERBS.reduce(function(acc, v, i){
@@ -631,11 +635,13 @@ let GOAL = 1;
 function recalcGoal(){
   GOAL = Math.max(1, wq.length + gq.length + tq.length + lq.length);
 }
-function bump(){
-  progress++;
-  const pct = Math.min(100, Math.round(progress/GOAL*100));
+function bump(){ progress++; updateProgress(); }
+/* 「あと何問」を出す。％より終わりが見えて、最後まで走りやすい */
+function updateProgress(){
+  const pct  = Math.min(100, Math.round(progress/GOAL*100));
+  const left = Math.max(0, GOAL - progress);
   document.getElementById('pbar').style.width = pct+'%';
-  document.getElementById('pnum').textContent = pct+'%';
+  document.getElementById('pnum').textContent = left > 0 ? ('あと'+left+'問') : 'かんりょう！🎉';
 }
 
 /* ===== 出題キュー：2周目は1周目の結果で並べ替え＆絞り込みされる ===== */
@@ -684,7 +690,6 @@ function resumeTimer(tab){
 
 /* ===== ① 単語カード ===== */
 let ci = Math.min(Tracker.getPos('words'), wq.length-1);
-let cSeen = false;                       // 裏（意味）を見たか＝正誤判定の材料
 const flash = document.getElementById('flash');
 function renderCard(){
   const w = DATA.words[wq[ci]];
@@ -695,14 +700,17 @@ function renderCard(){
   document.getElementById('cIdx').textContent = ci+1;
   flash.classList.remove('flipped');
   flash.setAttribute('aria-pressed','false');
-  cSeen = false;
+  document.getElementById('cCheck').style.display = 'none';   // うら返すまで採点させない
   Tracker.start('words', wq[ci]);
 }
 document.getElementById('cTotal').textContent = wq.length;
 function toggleFlash(){
   const f = flash.classList.toggle('flipped');
-  if(f) cSeen = true;
   flash.setAttribute('aria-pressed', f?'true':'false');
+  if(f){
+    Tracker.hold('words');   // ここまでが「頭の中で思い出していた時間」
+    document.getElementById('cCheck').style.display = 'flex';
+  }
 }
 flash.addEventListener('click', e=>{ if(e.target.id!=='fSpk') toggleFlash(); });
 flash.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleFlash(); } });
@@ -712,15 +720,18 @@ function cBusy(){ const t=Date.now(); if(t-cLock < 400) return true; cLock=t; re
 function goCard(step){ ci=(ci+step+wq.length)%wq.length; Tracker.setPos('words',ci); renderCard(); }
 document.getElementById('cNext').addEventListener('click', ()=>{
   if(cBusy()) return;
-  if(cSeen) Tracker.record('words', false);   // 意味を見てから送った＝あやふや
-  else      Tracker.cancel('words');          // 裏を見ずに飛ばした＝記録しない
+  Tracker.cancel('words');                    // とばした＝記録しない
   goCard(1);
 });
 document.getElementById('cPrev').addEventListener('click', ()=>{ Tracker.cancel('words'); goCard(-1); });
-document.getElementById('cKnow').addEventListener('click', ()=>{
+/* 思い出せたかを自分で採点する（見るだけにさせないので、連打もできない） */
+function scoreCard(ok){
   if(cBusy()) return;
-  Tracker.record('words', true); bump(); goCard(1);
-});
+  Tracker.record('words', ok);
+  bump(); goCard(1);
+}
+document.getElementById('cOk').addEventListener('click', ()=>scoreCard(true));
+document.getElementById('cNg').addEventListener('click', ()=>scoreCard(false));
 renderCard();
 
 /* ===== ② 文法ドリル ===== */
@@ -886,8 +897,7 @@ function startNextRound(){
   limitToday();
   recalcGoal();
   progress = 0;
-  document.getElementById('pbar').style.width = '0%';
-  document.getElementById('pnum').textContent = '0';
+  updateProgress();
   ci=0; gi=0; ti=0; li=0; gScore=0; tScore=0; lScore=0;
   document.getElementById('gScore').textContent='0';
   document.getElementById('tScore').textContent='0';
@@ -951,6 +961,7 @@ if(!Tracker.ok()){
   document.querySelector('header').insertAdjacentHTML('afterend',
     '<p class="banner">⚠️ この開き方では学習記録が残りません。おわったら「📊 ふりかえり」→「記録をコピー」で保存してください。</p>');
 }
+updateProgress();
 renderReview();
 </script>
 </body>
