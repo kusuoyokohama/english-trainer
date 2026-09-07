@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#4f7cff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="まとめ">
+<!-- 家族限定・検索避け -->
+<meta name="robots" content="noindex, nofollow">
+<title>不規則動詞 テスト前まとめ</title>
+<style>
+/* アプリ本体と同じ配色トークンを使い、見た目を揃える */
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --ink:#1b2333; --sub:#5b6478;
+  --brand:#4f7cff; --accent:#ff8a3d; --ok:#22a06b; --ng:#e5484d; --line:#e6e9f2;
+  --shadow:0 6px 20px rgba(27,35,51,.08); --radius:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#11151f; --card:#1a2030; --ink:#eef1f8; --sub:#9aa3b8;
+    --brand:#6b93ff; --accent:#ffa15c; --ok:#3ecf8e; --ng:#ff6b6f; --line:#2a3346;
+    --shadow:0 6px 20px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.7;
+  padding:env(safe-area-inset-top) 0 60px; -webkit-text-size-adjust:100%;
+}
+main{max-width:560px; margin:0 auto; padding:16px}
+h1{font-size:1.2rem; text-align:center; margin:8px 0 4px}
+.lead{text-align:center; font-size:.82rem; color:var(--sub); margin:0 0 18px}
+
+section{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow);
+        padding:16px 18px; margin:0 0 16px}
+h2{font-size:1rem; margin:0 0 4px; display:flex; align-items:center; gap:8px}
+h2 .no{background:var(--brand); color:#fff; font-size:.75rem; width:22px; height:22px;
+       border-radius:50%; display:grid; place-items:center; flex:0 0 auto}
+.note{font-size:.82rem; color:var(--sub); margin:2px 0 12px}
+
+/* 動詞の並び：スマホでも崩れないよう2〜3列で折り返す */
+.verbs{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:6px 14px}
+.v{font-size:.95rem; padding:3px 0; border-bottom:1px dashed var(--line)}
+.v b{font-weight:800; color:var(--brand)}
+.v .to{color:var(--sub); margin:0 4px}
+.v small{color:var(--sub); font-size:.75rem; display:block; line-height:1.4}
+
+.hit{background:color-mix(in srgb,var(--ng) 10%,var(--card)); border:1px solid color-mix(in srgb,var(--ng) 35%,var(--card))}
+.hit h2 .no{background:var(--ng)}
+.rule{background:color-mix(in srgb,var(--brand) 8%,var(--card));
+      border-left:4px solid var(--brand); padding:10px 14px; border-radius:8px;
+      margin:10px 0 4px; font-size:.9rem}
+.rule b{color:var(--brand)}
+.warn{font-size:.75rem; color:var(--sub); text-align:center; margin-top:20px}
+mark{background:color-mix(in srgb,var(--accent) 35%,transparent); color:inherit;
+     padding:0 3px; border-radius:3px; font-weight:700}
+</style>
+</head>
+<body>
+<main>
+  <h1>不規則動詞 テスト前まとめ ⚡</h1>
+  <p class="lead">ぜんぶ覚えようとしなくて大丈夫。<br>①と②だけで、まちがえたところは ほぼ直せます。</p>
+
+  <!-- 実際の学習記録から出した「その子の誤答」を先頭に置く -->
+  <section class="hit">
+    <h2><span class="no">1</span>きみが まちがえたところ</h2>
+    <p class="note">アプリの記録から。ここだけ直せば大きい。</p>
+    <div class="rule">
+      <b>過去形</b>で まちがえた3つ　→　じつは ぜんぶ 同じ仲間！<br>
+      bring → <mark>brought</mark>　buy → <mark>bought</mark>　catch → <mark>caught</mark>
+    </div>
+    <div class="rule">
+      <b>ing形</b>で まちがえた4つ　→　<mark>cut だけ</mark> t を重ねる。あとは そのまま ing<br>
+      cut → <mark>cutting</mark>　bring → bringing　draw → drawing　eat → eating
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">2</span>-ought / -aught のなかま</h2>
+    <p class="note">音も似ている。5つまとめて 声に出すと覚えやすい。</p>
+    <div class="verbs">
+      <div class="v"><b>bring</b><span class="to">→</span>brought<small>持ってくる</small></div>
+      <div class="v"><b>buy</b><span class="to">→</span>bought<small>買う</small></div>
+      <div class="v"><b>catch</b><span class="to">→</span>caught<small>つかまえる</small></div>
+      <div class="v"><b>teach</b><span class="to">→</span>taught<small>教える</small></div>
+      <div class="v"><b>think</b><span class="to">→</span>thought<small>思う</small></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">3</span>形が かわらない4つ</h2>
+    <p class="note">書くのはラク。でも read だけ注意。</p>
+    <div class="verbs">
+      <div class="v"><b>cut</b><span class="to">→</span>cut<small>切る</small></div>
+      <div class="v"><b>put</b><span class="to">→</span>put<small>置く</small></div>
+      <div class="v"><b>set</b><span class="to">→</span>set<small>準備する</small></div>
+      <div class="v"><b>read</b><span class="to">→</span>read<small>読む／つづりは同じ、読み方が「レッド」に変わる</small></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">4</span>ing形は この3パターンだけ</h2>
+    <div class="rule">
+      <b>A. 子音を重ねる</b>（短い母音1つ＋子音1つ で終わる語）<br>
+      cut→cutting　put→putting　set→setting　get→getting<br>
+      run→running　sit→sitting　swim→swimming
+    </div>
+    <div class="rule">
+      <b>B. e を消して ing</b>（e で終わる語）<br>
+      come→coming　give→giving　have→having　leave→leaving<br>
+      lose→losing　make→making　take→taking　write→writing
+    </div>
+    <div class="rule">
+      <b>C. そのまま ing</b>（のこり ぜんぶ）<br>
+      bring→bringing　draw→drawing　eat→eating　go→going …
+    </div>
+    <p class="note" style="margin-top:10px">迷ったら <b>C（そのまま）</b>。重ねるのは A の7つだけ。</p>
+  </section>
+
+  <section>
+    <h2><span class="no">5</span>のこり ぜんぶ（過去形）</h2>
+    <p class="note">上の①〜③に入らないもの。声に出して読もう。</p>
+    <div class="verbs">
+      <div class="v"><b>come</b><span class="to">→</span>came<small>来る</small></div>
+      <div class="v"><b>do</b><span class="to">→</span>did<small>する</small></div>
+      <div class="v"><b>draw</b><span class="to">→</span>drew<small>描く</small></div>
+      <div class="v"><b>drink</b><span class="to">→</span>drank<small>飲む</small></div>
+      <div class="v"><b>eat</b><span class="to">→</span>ate<small>食べる</small></div>
+      <div class="v"><b>feel</b><span class="to">→</span>felt<small>感じる</small></div>
+      <div class="v"><b>get</b><span class="to">→</span>got<small>得る</small></div>
+      <div class="v"><b>give</b><span class="to">→</span>gave<small>与える</small></div>
+      <div class="v"><b>go</b><span class="to">→</span>went<small>行く</small></div>
+      <div class="v"><b>have</b><span class="to">→</span>had<small>持っている</small></div>
+      <div class="v"><b>hear</b><span class="to">→</span>heard<small>聞こえる</small></div>
+      <div class="v"><b>know</b><span class="to">→</span>knew<small>知っている</small></div>
+      <div class="v"><b>leave</b><span class="to">→</span>left<small>去る</small></div>
+      <div class="v"><b>lose</b><span class="to">→</span>lost<small>負ける</small></div>
+      <div class="v"><b>make</b><span class="to">→</span>made<small>作る</small></div>
+      <div class="v"><b>meet</b><span class="to">→</span>met<small>会う</small></div>
+      <div class="v"><b>run</b><span class="to">→</span>ran<small>走る</small></div>
+      <div class="v"><b>say</b><span class="to">→</span>said<small>言う</small></div>
+      <div class="v"><b>see</b><span class="to">→</span>saw<small>見る</small></div>
+      <div class="v"><b>sing</b><span class="to">→</span>sang<small>歌う</small></div>
+      <div class="v"><b>sit</b><span class="to">→</span>sat<small>座る</small></div>
+      <div class="v"><b>sleep</b><span class="to">→</span>slept<small>眠る</small></div>
+      <div class="v"><b>speak</b><span class="to">→</span>spoke<small>話す</small></div>
+      <div class="v"><b>spend</b><span class="to">→</span>spent<small>過ごす</small></div>
+      <div class="v"><b>stand</b><span class="to">→</span>stood<small>立つ</small></div>
+      <div class="v"><b>swim</b><span class="to">→</span>swam<small>泳ぐ</small></div>
+      <div class="v"><b>take</b><span class="to">→</span>took<small>とる</small></div>
+      <div class="v"><b>tell</b><span class="to">→</span>told<small>話す</small></div>
+      <div class="v"><b>win</b><span class="to">→</span>won<small>勝つ</small></div>
+      <div class="v"><b>write</b><span class="to">→</span>wrote<small>書く</small></div>
+    </div>
+  </section>
+
+  <p class="warn">※教科書の巻末「不規則動詞活用表」の39語。活用と意味は事実情報です。<br>
+  グループ分けは、実際の学習記録から まちがえやすい順に並べています。</p>
+</main>
+</body>
+</html>
