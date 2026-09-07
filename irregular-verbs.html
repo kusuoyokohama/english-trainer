@@ -717,7 +717,18 @@ flash.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preve
 document.getElementById('fSpk').addEventListener('click', e=>{ e.stopPropagation(); speak(DATA.words[wq[ci]].en + ', ' + DATA.words[wq[ci]].jp); });
 let cLock = 0;   // カードの連打よけ：0.4秒以内の連続タップは受け付けない
 function cBusy(){ const t=Date.now(); if(t-cLock < 400) return true; cLock=t; return false; }
-function goCard(step){ ci=(ci+step+wq.length)%wq.length; Tracker.setPos('words',ci); renderCard(); }
+/* 1周したらループさせず、次のタブへ送る。
+   （ループすると「流し作業」になり、実際に0.4秒間隔で送られていたため） */
+function goNextTab(tab){
+  Tracker.cancel();
+  document.querySelector('[data-tab="'+tab+'"]').click();
+}
+function goCard(step){
+  const next = ci + step;
+  if(next >= wq.length){ goNextTab('grammar'); return; }   // カード終了 → クイズへ
+  ci = Math.max(0, next);
+  Tracker.setPos('words', ci); renderCard();
+}
 document.getElementById('cNext').addEventListener('click', ()=>{
   if(cBusy()) return;
   Tracker.cancel('words');                    // とばした＝記録しない
@@ -755,14 +766,21 @@ function renderGrammar(){
       else{ btn.classList.add('wrong'); box.children[item.a].classList.add('correct'); fb.textContent='おしい！正解は「'+item.choices[item.a]+'」'; fb.className='feedback ng'; }
       speak(item.say || item.choices[item.a]);   // 日本語の問題文は読まない
       bump();
-      document.getElementById('gNext').style.display = (gi<gq.length-1)?'flex':'none';
-      if(gi===gq.length-1){ fb.textContent += '　ぜんぶ終わり！正解 '+gScore+'/'+gq.length; }
+      const nx = document.getElementById('gNext');
+      nx.style.display = 'flex';
+      if(gi < gq.length-1){ nx.textContent = 'つぎの問題 →'; nx.dataset.go = ''; }
+      else { nx.textContent = 'つぎは 🔁意味 へ →'; nx.dataset.go = 'trans';
+             fb.textContent += '　クイズ終わり！正解 '+gScore+'/'+gq.length; }
     });
     box.appendChild(btn);
   });
   Tracker.start('grammar', gq[gi]);
 }
-document.getElementById('gNext').addEventListener('click',()=>{ gi++; Tracker.setPos('grammar',gi); renderGrammar(); });
+document.getElementById('gNext').addEventListener('click',()=>{
+  const go = document.getElementById('gNext').dataset.go;
+  if(go){ goNextTab(go); return; }            // クイズ終わり → 意味へ
+  gi++; Tracker.setPos('grammar',gi); renderGrammar();
+});
 renderGrammar();
 
 /* ===== ③ 和訳・英訳（自己採点） ===== */
@@ -790,7 +808,9 @@ document.getElementById('tSpk').addEventListener('click',()=>speak(DATA.trans[tq
 function nextTrans(ok){
   Tracker.record('trans', ok);
   if(ok){tScore++; document.getElementById('tScore').textContent=tScore;}
-  bump(); ti=(ti+1)%tq.length; Tracker.setPos('trans',ti); renderTrans();
+  bump();
+  if(ti+1 >= tq.length){ goNextTab('listen'); return; }   // 意味 終了 → 発音へ
+  ti++; Tracker.setPos('trans',ti); renderTrans();
 }
 document.getElementById('tOk').addEventListener('click',()=>nextTrans(true));
 document.getElementById('tNg').addEventListener('click',()=>nextTrans(false));
@@ -813,7 +833,9 @@ document.getElementById('lPlay').addEventListener('click',()=>{
 function nextListen(ok){
   Tracker.record('listen', ok, {plays:lPlays});
   if(ok){ lScore++; document.getElementById('lScore').textContent=lScore; }
-  bump(); li=(li+1)%lq.length; Tracker.setPos('listen',li); renderListen();
+  bump();
+  if(li+1 >= lq.length){ goNextTab('review'); renderReview(); return; }  // 発音 終了 → ふりかえりへ
+  li++; Tracker.setPos('listen',li); renderListen();
 }
 document.getElementById('lOk').addEventListener('click',()=>nextListen(true));
 document.getElementById('lNg').addEventListener('click',()=>nextListen(false));
