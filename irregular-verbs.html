@@ -158,6 +158,15 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
   font-family:ui-monospace,monospace; -webkit-user-select:all; user-select:all}
 .rv-row{display:flex; gap:8px; flex-wrap:wrap}
 .rv-row .btn{flex:1 1 auto; min-width:44%}
+/* ===== はんい選び ===== */
+.rangebar{max-width:520px; margin:10px auto 0; padding:0 16px;
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+.rangebar .rl{font-size:.75rem; color:var(--sub); flex:0 0 auto}
+.rangebar button{flex:1 1 0; min-width:64px; min-height:38px; padding:4px 6px;
+  border:1px solid var(--line); border-radius:99px; background:var(--card);
+  color:var(--sub); font-size:.8rem; font-weight:700; cursor:pointer; transition:.15s}
+.rangebar button.on{background:var(--brand); color:var(--brand-ink); border-color:var(--brand)}
+.rangebar button:active{transform:scale(.97)}
 .banner{max-width:520px; margin:8px auto 0; padding:10px 14px; border-radius:12px;
   font-size:.8rem; background:color-mix(in srgb,var(--ng) 12%,var(--card)); color:var(--ng);
   border:1px solid color-mix(in srgb,var(--ng) 30%,var(--card))}
@@ -173,6 +182,9 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
     <span id="pnum">0</span>
   </div>
 </header>
+
+<!-- どの10語をやるか自分で選べる（記録が消えても選び直せるように） -->
+<div class="rangebar" id="rangeBar" role="group" aria-label="はんいをえらぶ"></div>
 
 <nav id="tabs" role="tablist" aria-label="学習メニュー">
   <button role="tab" aria-selected="true"  data-tab="cards">🃏 活用カード</button>
@@ -276,7 +288,7 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
     </div>
   </section>
 
-  <p class="warn">※教科書の巻末「不規則動詞活用表」の<b>39語</b>です。活用と意味は事実情報をそのまま使っています。<br><b>1日20語ずつ・2日で1周</b>する分量です。学習の記録は<b>この端末の中だけ</b>に保存され、外部には送信されません。音声は端末のブラウザ読み上げ機能を使うため、対応端末でのみ再生されます。</p>
+  <p class="warn">※教科書の巻末「不規則動詞活用表」の<b>39語</b>です。活用と意味は事実情報をそのまま使っています。<br><b>1日10語ずつ・4日で1周</b>する分量です（やる範囲は上のボタンで選べます）。学習の記録は<b>この端末の中だけ</b>に保存され、外部には送信されません。音声は端末のブラウザ読み上げ機能を使うため、対応端末でのみ再生されます。</p>
 </main>
 
 <script>
@@ -621,6 +633,8 @@ const Tracker = (function(){
     queue:queue, judge:judge, summary:summary,
     exportText:exportText, importText:importText, reset:reset, remaining:remaining,
     setPos:function(tab,i){ st.pos[tab]=i; save(); },
+    setRange:function(i){ st.range=i; st.pos={}; save(); },   // はんいを変えたら位置もリセット
+    getRange:function(){ return (st.range===undefined || st.range===null) ? null : st.range; },
     getPos:function(tab){ return st.pos[tab]|0; },
     round:function(){ return st.round; },
     nextRound:function(){ st.round++; st.pos={}; save(); },
@@ -656,9 +670,16 @@ recalcGoal();
    きょう20語 → あす残り19語、と自動で進む。2周目は苦手だけなので絞らない */
 function limitToday(){
   if(Tracker.round() > 1) return;
-  const done = Tracker.items(), today = [];
-  for(let i=0; i<VERBS.length && today.length<DAILY; i++){
-    if(!done['w:'+VERBS[i].base]) today.push(VERBS[i].base);
+  const today = [], r = Tracker.getRange();
+  if(r !== null){
+    // 自分で選んだはんいの10語
+    VERBS.slice(r*DAILY, r*DAILY+DAILY).forEach(function(v){ today.push(v.base); });
+  }else{
+    // 選んでいなければ、まだやっていない語から順に
+    const done = Tracker.items();
+    for(let i=0; i<VERBS.length && today.length<DAILY; i++){
+      if(!done['w:'+VERBS[i].base]) today.push(VERBS[i].base);
+    }
   }
   if(!today.length) return;               // ぜんぶ終わっていれば絞らない
   const on = function(b){ return today.indexOf(b) >= 0; };
@@ -686,6 +707,50 @@ function resumeTimer(tab){
   if(tab==='grammar' && !gAnswered) Tracker.start('grammar', gq[gi]);
   if(tab==='trans' && document.getElementById('tCheck').style.display==='none') Tracker.start('trans', tq[ti]);
   if(tab==='listen')  Tracker.start('listen', lq[li]);
+}
+
+/* ===== はんい選び：どの10語からやるか自分で決められる =====
+   記録が消えても選び直せるので、毎回1語目に戻ってしまう問題が起きない */
+function currentRangeIdx(){
+  const r = Tracker.getRange();
+  if(r !== null) return r;
+  const done = Tracker.items();          // 未選択なら「まだやっていない語」の位置から判定
+  for(let i=0;i<VERBS.length;i++){ if(!done['w:'+VERBS[i].base]) return Math.floor(i/DAILY); }
+  return 0;
+}
+function renderRangeBar(){
+  const bar = document.getElementById('rangeBar');
+  if(Tracker.round() > 1){ bar.style.display='none'; return; }  // 2周目は苦手だけなので不要
+  bar.style.display = 'flex';
+  const cur = currentRangeIdx();
+  let h = '<span class="rl">はんい</span>';
+  for(let i=0; i*DAILY < VERBS.length; i++){
+    const from = i*DAILY+1, to = Math.min((i+1)*DAILY, VERBS.length);
+    h += '<button type="button" data-r="'+i+'"'+(cur===i?' class="on"':'')
+       + ' aria-pressed="'+(cur===i)+'">'+from+'〜'+to+'</button>';
+  }
+  bar.innerHTML = h;
+  bar.querySelectorAll('button').forEach(function(b){
+    b.addEventListener('click', function(){ setRange(parseInt(b.dataset.r,10)); });
+  });
+}
+function setRange(i){
+  Tracker.setRange(i);
+  Tracker.cancel();
+  wq = Tracker.queue('words');  gq = Tracker.queue('grammar');
+  tq = Tracker.queue('trans');  lq = Tracker.queue('listen');
+  limitToday(); recalcGoal();
+  ci=0; gi=0; ti=0; li=0; gScore=0; tScore=0; lScore=0; progress=0;
+  document.getElementById('gScore').textContent='0';
+  document.getElementById('tScore').textContent='0';
+  document.getElementById('lScore').textContent='0';
+  document.getElementById('cTotal').textContent = wq.length;
+  document.getElementById('gTotal').textContent = gq.length;
+  document.getElementById('tTotal').textContent = tq.length;
+  document.getElementById('lTotal').textContent = lq.length;
+  renderCard(); renderGrammar(); renderTrans(); renderListen();
+  updateProgress(); renderRangeBar();
+  document.querySelector('[data-tab="cards"]').click();   // 先頭のタブから始める
 }
 
 /* ===== ① 単語カード ===== */
@@ -930,6 +995,7 @@ function startNextRound(){
   document.getElementById('lTotal').textContent = lq.length;
   renderCard(); renderGrammar(); renderTrans(); renderListen();
   Tracker.cancel();
+  renderRangeBar();
   renderReview();
 }
 
@@ -984,6 +1050,7 @@ if(!Tracker.ok()){
     '<p class="banner">⚠️ この開き方では学習記録が残りません。おわったら「📊 ふりかえり」→「記録をコピー」で保存してください。</p>');
 }
 updateProgress();
+renderRangeBar();
 renderReview();
 </script>
 </body>
