@@ -168,7 +168,7 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
   <h1>不規則動詞トレ ⚡</h1>
   <div class="unit">中1 不規則動詞 39語（原形・過去形・ing形）</div>
   <div class="progress">
-    <span>きょうの学習</span>
+    <span>今日の学習</span>
     <div class="bar"><i id="pbar"></i></div>
     <span id="pnum">0</span>
   </div>
@@ -176,10 +176,10 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
 
 <nav id="tabs" role="tablist" aria-label="学習メニュー">
   <button role="tab" aria-selected="true"  data-tab="cards">🃏 活用カード</button>
-  <button role="tab" aria-selected="false" data-tab="grammar">✏️ かたちクイズ</button>
+  <button role="tab" aria-selected="false" data-tab="grammar">✏️ 活用クイズ</button>
   <button role="tab" aria-selected="false" data-tab="trans">🔁 意味</button>
   <button role="tab" aria-selected="false" data-tab="listen">🔊 発音</button>
-  <button role="tab" aria-selected="false" data-tab="review">📊 ふりかえり</button>
+  <button role="tab" aria-selected="false" data-tab="review">📊 振り返り</button>
 </nav>
 
 <main>
@@ -194,18 +194,18 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
         </div>
         <div class="face back">
           <div class="mean" id="fMean">これ</div>
-          <div class="pos" id="fBack">タップでもどる</div>
+          <div class="pos" id="fBack">タップで戻る</div>
         </div>
       </div>
     </div>
-    <p class="hint">まず 頭の中で 答えてから、カードをタップして たしかめよう。</p>
+    <p class="hint">まず頭の中で答えてから、カードをタップして確かめよう。</p>
     <div class="selfcheck" id="cCheck" style="display:none">
       <button class="btn ghost" id="cNg">言えなかった</button>
       <button class="btn" id="cOk">言えた 🙆</button>
     </div>
     <div class="row" style="margin-top:12px">
-      <button class="btn ghost small" id="cPrev">← まえ</button>
-      <button class="btn ghost small" id="cNext">とばす →</button>
+      <button class="btn ghost small" id="cPrev">← 前へ</button>
+      <button class="btn ghost small" id="cNext">飛ばす →</button>
     </div>
     <div class="counter"><span id="cIdx">1</span> / <span id="cTotal">8</span></div>
   </section>
@@ -217,7 +217,7 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
       <div class="choices" id="gChoices"></div>
       <div class="feedback" id="gFb"></div>
     </div>
-    <button class="btn" id="gNext" style="display:none">つぎの問題 →</button>
+    <button class="btn" id="gNext" style="display:none">次の問題 →</button>
     <div class="counter"><span id="gIdx">1</span> / <span id="gTotal">5</span>　正解 <span id="gScore">0</span></div>
   </section>
 
@@ -226,10 +226,10 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
     <div class="card">
       <div class="jp" id="tJp"></div>
       <button class="spk" id="tSpk" aria-label="英文を聞く" style="display:none">🔊</button>
-      <button class="btn ghost" id="tShow">答えをみる 👀</button>
+      <button class="btn ghost" id="tShow">答えを見る 👀</button>
       <div class="answer" id="tAns"></div>
       <div class="selfcheck" id="tCheck" style="display:none">
-        <button class="btn ghost" id="tNg">まちがえた</button>
+        <button class="btn ghost" id="tNg">間違えた</button>
         <button class="btn" id="tOk">できた 🙆</button>
       </div>
     </div>
@@ -247,14 +247,14 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
         <input type="range" id="lSpeed" min="0.5" max="1" step="0.1" value="0.8" aria-label="読み上げ速度">
         <span>🐇</span>
       </div>
-      <p class="hint">つづりから 音が わかりにくいものを あつめたよ。声に出して マネしよう。</p>
+      <p class="hint">つづりから発音が読みにくいものを集めた。声に出してまねしよう。</p>
       <div class="selfcheck" id="lCheck">
-        <button class="btn ghost" id="lNg">もういちど</button>
+        <button class="btn ghost" id="lNg">もう一度</button>
         <button class="btn" id="lOk">聞き取れた 🙆</button>
       </div>
     </div>
     <div class="row">
-      <button class="btn ghost small" id="lPrev">← まえ</button>
+      <button class="btn ghost small" id="lPrev">← 前へ</button>
       <button class="btn ghost small" id="lNext">つぎ →</button>
     </div>
     <div class="counter"><span id="lIdx">1</span> / <span id="lTotal">5</span>　聞けた <span id="lScore">0</span></div>
@@ -264,11 +264,11 @@ main{max-width:520px; margin:0 auto; padding:8px 16px 120px}
   <section id="review" class="panel" role="tabpanel">
     <div id="rvBody"></div>
     <div class="card">
-      <h3 style="margin:0 0 4px; font-size:1rem">記録の持ち出し・やりなおし</h3>
+      <h3 style="margin:0 0 4px; font-size:1rem">記録の書き出し・やり直し</h3>
       <p class="hint" style="margin-bottom:12px">週に1回「記録をコピー」を押して、送ってください。</p>
       <div class="rv-row">
         <button class="btn ghost small" id="rvCopy">📋 記録をコピー</button>
-        <button class="btn ghost small" id="rvPaste">📥 読みこむ</button>
+        <button class="btn ghost small" id="rvPaste">📥 読み込む</button>
         <button class="btn ghost small" id="rvReset">🗑 記録を消す</button>
       </div>
       <textarea class="rv-out" id="rvText" style="display:none" spellcheck="false" aria-label="記録データ"></textarea>
@@ -415,7 +415,7 @@ const Tracker = (function(){
   /* 速すぎる回答＝考えずにタップした疑い（ミリ秒） */
   const HASTY_MS = {words:1200, grammar:1200, trans:3000,  listen:0};
   const AWAY_MS  = 90000; // これを超えたら離席とみなし、秒数は記録しない
-  const TABNAME  = {words:'活用カード', grammar:'かたちクイズ', trans:'意味', listen:'発音'};
+  const TABNAME  = {words:'活用カード', grammar:'活用クイズ', trans:'意味', listen:'発音'};
 
   let st = null;      // 記録本体
   let live = true;    // 保存が使えるか
@@ -579,11 +579,11 @@ const Tracker = (function(){
     return [
       '■ 英語トレ 学習記録  ' + LESSON,
       '出力: ' + new Date().toLocaleString('ja-JP'),
-      '周回: ' + st.round + '周目 ／ 記録した項目: ' + s.total + ' ／ きょうの学習: 約' + s.todayMin + '分',
-      'もういちど ' + s.red.length + ' ／ あとすこし ' + s.yellow.length + ' ／ バッチリ ' + s.green.length,
+      '周回: ' + st.round + '周目 ／ 記録した項目: ' + s.total + ' ／ 今日の学習: 約' + s.todayMin + '分',
+      'もう一度 ' + s.red.length + ' ／ あと少し ' + s.yellow.length + ' ／ できた ' + s.green.length,
       '',
-      '【もういちど】' + (s.red.join(' / ') || 'なし'),
-      '【あとすこし】' + (s.yellow.join(' / ') || 'なし'),
+      '【もう一度】' + (s.red.join(' / ') || 'なし'),
+      '【あと少し】' + (s.yellow.join(' / ') || 'なし'),
       '',
       '--- ここから下はデータ（消さずにそのまま送ってください） ---',
       JSON.stringify(st)
@@ -646,7 +646,7 @@ function updateProgress(){
   const pct  = Math.min(100, Math.round(progress/GOAL*100));
   const left = Math.max(0, GOAL - progress);
   document.getElementById('pbar').style.width = pct+'%';
-  document.getElementById('pnum').textContent = left > 0 ? ('あと'+left+'問') : 'かんりょう！🎉';
+  document.getElementById('pnum').textContent = left > 0 ? ('あと'+left+'問') : '完了！🎉';
 }
 
 /* ===== 出題キュー：2周目は1周目の結果で並べ替え＆絞り込みされる ===== */
@@ -658,7 +658,7 @@ limitToday();
 recalcGoal();
 
 /* 1日ぶん（20語）に絞る。まだやっていない語から順に出すので、
-   きょう20語 → あす残り19語、と自動で進む。2周目は苦手だけなので絞らない */
+   2周目は苦手だけなので絞らない */
 function limitToday(){
   if(Tracker.round() > 1) return;
   const today = pickToday();
@@ -755,7 +755,7 @@ document.getElementById('cTotal').textContent = wq.length;
 function toggleFlash(){
   // うら返す前に、思い出す時間をとらせる
   if(!flash.classList.contains('flipped') && Tracker.elapsed('words') < THINK_MS){
-    nudge('cards', 'まだ早いよ！ 頭の中で 答えてみて 👀');
+    nudge('cards', 'まだ早い！ 頭の中で答えてみて 👀');
     return;
   }
   const f = flash.classList.toggle('flipped');
@@ -815,14 +815,14 @@ function renderGrammar(){
       const hit = (idx===item.a);
       Tracker.record('grammar', hit);            // 正誤＋考えていた秒数を記録
       const fb=document.getElementById('gFb');
-      if(hit){ btn.classList.add('correct'); fb.textContent='せいかい！🎉'; fb.className='feedback ok'; gScore++; document.getElementById('gScore').textContent=gScore; }
-      else{ btn.classList.add('wrong'); box.children[item.a].classList.add('correct'); fb.textContent='おしい！正解は「'+item.choices[item.a]+'」'; fb.className='feedback ng'; }
+      if(hit){ btn.classList.add('correct'); fb.textContent='正解！🎉'; fb.className='feedback ok'; gScore++; document.getElementById('gScore').textContent=gScore; }
+      else{ btn.classList.add('wrong'); box.children[item.a].classList.add('correct'); fb.textContent='惜しい！正解は「'+item.choices[item.a]+'」'; fb.className='feedback ng'; }
       speak(item.say || item.choices[item.a]);   // 日本語の問題文は読まない
       bump();
       const nx = document.getElementById('gNext');
       nx.style.display = 'flex';
-      if(gi < gq.length-1){ nx.textContent = 'つぎの問題 →'; nx.dataset.go = ''; }
-      else { nx.textContent = 'つぎは 🔁意味 へ →'; nx.dataset.go = 'trans';
+      if(gi < gq.length-1){ nx.textContent = '次の問題 →'; nx.dataset.go = ''; }
+      else { nx.textContent = '次は 🔁意味 へ →'; nx.dataset.go = 'trans';
              fb.textContent += '　クイズ終わり！正解 '+gScore+'/'+gq.length; }
     });
     box.appendChild(btn);
@@ -853,7 +853,7 @@ document.getElementById('tShow').addEventListener('click',()=>{
   if(Tracker.elapsed('trans') < THINK_MS){          // 日本語を見て即「答えをみる」は止める
     const b = document.getElementById('tShow');
     if(!b.dataset.orig) b.dataset.orig = b.textContent;
-    b.textContent = 'まだ早いよ！ 言ってみて 👀';
+    b.textContent = 'まだ早い！ まず言ってみて 👀';
     clearTimeout(b._t);
     b._t = setTimeout(function(){ b.textContent = b.dataset.orig; }, 1600);
     return;
@@ -892,7 +892,7 @@ document.getElementById('lPlay').addEventListener('click',()=>{
   if(speak(DATA.listen[lq[li]].en, parseFloat(document.getElementById('lSpeed').value))) lPlays++;
 });
 function nextListen(ok){
-  if(lPlays === 0){ nudge('listen', 'まず ▶️ を押して 聞いてみよう'); return; }
+  if(lPlays === 0){ nudge('listen', 'まず ▶️ を押して聞いてみよう'); return; }
   Tracker.record('listen', ok, {plays:lPlays});
   if(ok){ lScore++; document.getElementById('lScore').textContent=lScore; }
   bump();
@@ -912,8 +912,8 @@ function renderReview(){
   const box = document.getElementById('rvBody');
   const tot = s.red.length + s.yellow.length + s.green.length;
   if(!tot){
-    box.innerHTML = '<div class="card" style="text-align:center">きょうはまだ学習していません。<br>'
-      + '<span class="hint">上のタブをえらんで、はじめよう！</span></div>';
+    box.innerHTML = '<div class="card" style="text-align:center">今日はまだ学習していません。<br>'
+      + '<span class="hint">上のタブを選んで始めよう。</span></div>';
     return;
   }
   const pc = function(n){ return Math.round(n/tot*100); };
@@ -928,44 +928,44 @@ function renderReview(){
   };
 
   let h = '<div class="rv-top"><div class="big">'+tot+'</div>'
-        + '<div class="cap">こ の もんだいを やったよ（約'+s.todayMin+'分）</div></div>'
+        + '<div class="cap">問 完了（約'+s.todayMin+'分）</div></div>'
         + '<div class="rv-bar">'
         + '<span style="width:'+pc(s.green.length)+'%;background:var(--ok)"></span>'
         + '<span style="width:'+pc(s.yellow.length)+'%;background:var(--accent)"></span>'
         + '<span style="width:'+pc(s.red.length)+'%;background:var(--ng)"></span></div>';
-  h += grp('🔴','もういちど', s.red);
-  h += grp('🟡','あとすこし', s.yellow);
-  h += grp('🟢','バッチリ',   s.green);
+  h += grp('🔴','もう一度', s.red);
+  h += grp('🟡','あと少し', s.yellow);
+  h += grp('🟢','できた',   s.green);
 
   let t = '';
   for(const k in s.byTab){
     const b = s.byTab[k];
     if(!b.n) continue;
     t += (b.red ? '🔴' : b.yellow ? '🟡' : '🟢') + ' <b>'+b.name+'</b>　'
-       + 'バッチリ '+b.green+' ／ あとすこし '+b.yellow+' ／ もういちど '+b.red+'<br>';
+       + 'できた '+b.green+' ／ あと少し '+b.yellow+' ／ もう一度 '+b.red+'<br>';
   }
   if(t) h += '<div class="card"><div class="rv-tabs">'+t+'</div></div>';
 
   if(s.todayMin >= 25){
-    h += '<div class="card" style="text-align:center"><b>きょうはよくがんばった！ 🎉</b><br>'
-       + '<span class="hint">ここまでにして、つづきはあしたにしよう。とちゅうから再開できます。</span></div>';
+    h += '<div class="card" style="text-align:center"><b>今日はよく頑張った！ 🎉</b><br>'
+       + '<span class="hint">ここまでにして、続きは明日にしよう。途中から再開できます。</span></div>';
   }
   if(Tracker.round() === 1){
-    // 39語を2日で1周する設計なので、ぜんぶ終わるまで2周目に進ませない
-    // （未学習のまま2周目に入ると、にがて以外もどっさり出てしまうため）
+    // 1日10語ずつ進む設計なので、全部終わるまで2周目に進ませない
+    // （未学習のまま2周目に入ると、苦手以外も大量に出てしまうため）
     const done = Tracker.items();
     let remainWords = 0;
     for(let i=0;i<VERBS.length;i++) if(!done['w:'+VERBS[i].base]) remainWords++;
     const remainAll = Tracker.remaining();
     if(remainWords > 0){
-      h += '<div class="card" style="text-align:center">のこり <b>'+remainWords+'語</b><br>'
-         + '<span class="hint">ぜんぶ終わったら「2周目」にすすめるよ。あしたも つづきから！</span></div>';
+      h += '<div class="card" style="text-align:center">残り <b>'+remainWords+'語</b><br>'
+         + '<span class="hint">全部終わったら「2周目」に進める。明日も続きから。</span></div>';
     }else if(remainAll > 0){
       h += '<div class="card" style="text-align:center">あと <b>'+remainAll+'問</b><br>'
-         + '<span class="hint">やっていないタブが のこっているよ。ぜんぶ終わると「2周目」にすすめます。</span></div>';
+         + '<span class="hint">やっていないタブが残っている。全部終わると「2周目」に進める。</span></div>';
     }else{
-      h += '<div class="card"><button class="btn" id="rvRound">2周目をはじめる（にがてだけ）</button>'
-         + '<p class="hint">1周目でつまずいたところだけを、にがてな順に出します。</p></div>';
+      h += '<div class="card"><button class="btn" id="rvRound">2周目を始める（苦手だけ）</button>'
+         + '<p class="hint">1周目でつまずいた所だけを、苦手な順に出します。</p></div>';
     }
   }
   box.innerHTML = h;
@@ -1003,24 +1003,24 @@ document.getElementById('rvCopy').addEventListener('click', function(){
   rvText.style.display = 'block'; rvText.value = txt;
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(txt)
-      .then(function(){ say('コピーしました！ そのまま貼りつけて送れます。'); })
-      .catch(function(){ rvText.select(); say('下のわくを長おし →「すべてを選択」→「コピー」してください。'); });
+      .then(function(){ say('コピーしました！ そのまま貼り付けて送れます。'); })
+      .catch(function(){ rvText.select(); say('下の枠を長押し →「すべてを選択」→「コピー」してください。'); });
   }else{
-    rvText.select(); say('下のわくを長おし →「すべてを選択」→「コピー」してください。');
+    rvText.select(); say('下の枠を長押し →「すべてを選択」→「コピー」してください。');
   }
 });
 document.getElementById('rvPaste').addEventListener('click', function(){
   if(rvText.style.display === 'none'){
     rvText.style.display='block'; rvText.value=''; rvText.focus();
-    say('前にコピーした記録を下のわくに貼りつけて、もう一度「読みこむ」を押してください。');
+    say('前にコピーした記録を下の枠に貼り付けて、もう一度「読み込む」を押してください。');
     return;
   }
-  if(!rvText.value.trim()){ say('わくが空です。記録を貼りつけてください。'); return; }
+  if(!rvText.value.trim()){ say('枠が空です。記録を貼り付けてください。'); return; }
   if(Tracker.importText(rvText.value)){
-    say('読みこみました。画面を作りなおします…');
+    say('読み込みました。画面を作り直します…');
     setTimeout(function(){ location.reload(); }, 600);
   }else{
-    say('読みこめませんでした。コピーした文を、切らずにぜんぶ貼りつけてください。');
+    say('読み込めませんでした。コピーした文を、切らずに全部貼り付けてください。');
   }
 });
 let resetArm = false, resetTimer = 0;
@@ -1028,13 +1028,13 @@ document.getElementById('rvReset').addEventListener('click', function(){
   const b = document.getElementById('rvReset');
   if(!resetArm){
     resetArm = true; b.textContent = '⚠️ 本当に消す？';
-    say('消すと元にもどせません。先に「記録をコピー」で保存できます。10秒いないにもう一度押すと消えます。');
+    say('消すと元に戻せません。先に「記録をコピー」で保存できます。10秒以内にもう一度押すと消えます。');
     clearTimeout(resetTimer);
     resetTimer = setTimeout(function(){ resetArm=false; b.textContent='🗑 記録を消す'; say(''); }, 10000);
     return;
   }
   clearTimeout(resetTimer); resetArm = false;
-  Tracker.reset(); say('消しました。画面を作りなおします…');
+  Tracker.reset(); say('消しました。画面を作り直します…');
   setTimeout(function(){ location.reload(); }, 600);
 });
 
@@ -1043,7 +1043,7 @@ applyTtsFallback();
 if(!Tracker.ok()){
   // 記録が残らない端末では、黙って失敗させずに理由と対処を出す
   document.querySelector('header').insertAdjacentHTML('afterend',
-    '<p class="banner">⚠️ この開き方では学習記録が残りません。おわったら「📊 ふりかえり」→「記録をコピー」で保存してください。</p>');
+    '<p class="banner">⚠️ この開き方では学習記録が残りません。終わったら「📊 振り返り」→「記録をコピー」で保存してください。</p>');
 }
 updateProgress();
 renderReview();
