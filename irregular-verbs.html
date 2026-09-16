@@ -620,6 +620,11 @@ const Tracker = (function(){
     start:start, cancel:cancel, hold:hold, record:record,
     queue:queue, judge:judge, summary:summary,
     exportText:exportText, importText:importText, reset:reset, remaining:remaining,
+    elapsed:function(tab){                      // 今の問題を何ミリ秒考えているか
+      const p = pend[tab];
+      if(!p) return Infinity;
+      return p.held!==null ? p.held : (now()-p.t0-p.away);
+    },
     setPos:function(tab,i){ st.pos[tab]=i; save(); },
     getPos:function(tab){ return st.pos[tab]|0; },
     round:function(){ return st.round; },
@@ -716,6 +721,21 @@ function pickToday(){
     .slice(0, DAILY);
 }
 
+/* ===== 速すぎる操作を止めて、考える時間をつくる =====
+   自分で採点するタブ（カード・意味・発音）は、見ないまま「できた」を押せてしまう。
+   実際、初見の語なのにカードは100%「言えた」なのに、同じ語のクイズは55%だった。
+   罰ではなく「まだ早いよ」と差し戻して、思い出す一瞬をつくる。 */
+const THINK_MS = 1500;
+function nudge(panelId, msg){
+  const el = document.querySelector('#'+panelId+' .hint');
+  if(!el) return;
+  if(!el.dataset.orig) el.dataset.orig = el.textContent;
+  el.textContent = msg;
+  el.style.color = 'var(--ng)';
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.textContent = el.dataset.orig; el.style.color = ''; }, 1600);
+}
+
 /* ===== ① 単語カード ===== */
 let ci = Math.min(Tracker.getPos('words'), wq.length-1);
 const flash = document.getElementById('flash');
@@ -733,6 +753,11 @@ function renderCard(){
 }
 document.getElementById('cTotal').textContent = wq.length;
 function toggleFlash(){
+  // うら返す前に、思い出す時間をとらせる
+  if(!flash.classList.contains('flipped') && Tracker.elapsed('words') < THINK_MS){
+    nudge('cards', 'まだ早いよ！ 頭の中で 答えてみて 👀');
+    return;
+  }
   const f = flash.classList.toggle('flipped');
   flash.setAttribute('aria-pressed', f?'true':'false');
   if(f){
@@ -825,6 +850,14 @@ function renderTrans(){
   Tracker.start('trans', tq[ti]);
 }
 document.getElementById('tShow').addEventListener('click',()=>{
+  if(Tracker.elapsed('trans') < THINK_MS){          // 日本語を見て即「答えをみる」は止める
+    const b = document.getElementById('tShow');
+    if(!b.dataset.orig) b.dataset.orig = b.textContent;
+    b.textContent = 'まだ早いよ！ 言ってみて 👀';
+    clearTimeout(b._t);
+    b._t = setTimeout(function(){ b.textContent = b.dataset.orig; }, 1600);
+    return;
+  }
   Tracker.hold('trans');   // ここまでが「頭の中で英文を組み立てていた時間」＝本当の思考時間
   document.getElementById('tAns').classList.add('show');
   document.getElementById('tShow').style.display='none';
@@ -859,6 +892,7 @@ document.getElementById('lPlay').addEventListener('click',()=>{
   if(speak(DATA.listen[lq[li]].en, parseFloat(document.getElementById('lSpeed').value))) lPlays++;
 });
 function nextListen(ok){
+  if(lPlays === 0){ nudge('listen', 'まず ▶️ を押して 聞いてみよう'); return; }
   Tracker.record('listen', ok, {plays:lPlays});
   if(ok){ lScore++; document.getElementById('lScore').textContent=lScore; }
   bump();
