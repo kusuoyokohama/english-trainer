@@ -53,7 +53,7 @@ svg{display:block; width:100%; height:auto}
   <button class="print" type="button" onclick="window.print()">🖨 印刷する</button>
 
   <div class="head">
-    <h1>不規則動詞 書き取り ①　過去形</h1>
+    <h1 id="ttl">不規則動詞 書き取り ①　過去形</h1>
     <span class="date">　　月　　日</span>
   </div>
   <p class="how">
@@ -65,7 +65,7 @@ svg{display:block; width:100%; height:auto}
 
 <div class="sheet page2">
   <div class="head">
-    <h1>確認テスト（見本を見ないで書く）</h1>
+    <h1 id="ttl2">確認テスト ①（見本を見ないで書く）</h1>
     <span class="date">　　月　　日</span>
   </div>
   <p class="how">1ページ目を隠して、過去形を書く。書き終わったら1ページ目で答え合わせ。</p>
@@ -73,21 +73,70 @@ svg{display:block; width:100%; height:auto}
 </div>
 
 <script>
-/* ===== 書き取りの10語 =====
-   英語トレの学習記録（9/6〜9/18）で過去形を間違えた回数・新しさの順に選んだ。
-   ここを差し替えれば、別の10語のプリントになる */
-const WORDS = [
-  {base:"bring", past:"brought", jp:"持ってくる"},
-  {base:"buy",   past:"bought",  jp:"買う"},
-  {base:"go",    past:"went",    jp:"行く"},
-  {base:"leave", past:"left",    jp:"去る"},
-  {base:"know",  past:"knew",    jp:"知っている"},
-  {base:"come",  past:"came",    jp:"来る"},
-  {base:"speak", past:"spoke",   jp:"話す"},
-  {base:"make",  past:"made",    jp:"作る"},
-  {base:"sing",  past:"sang",    jp:"歌う"},
-  {base:"hear",  past:"heard",   jp:"聞こえる"},
-];
+/* ===== 書き取りの語（39語を4枚に分ける） =====
+   ① 学習記録で過去形を間違えた回数・新しさの順
+   ② 綴りが難しいもの（ought/aught など）＋これまで間違えた語
+   ③ 語尾が t / d になるもの中心
+   ④ 短く変化が少ないもの（形が同じ語を含む）
+   URLの ?set=2 のように番号を付けると、その回のプリントになる */
+const SETS = {
+  1: [
+    {base:"bring", past:"brought", jp:"持ってくる"},
+    {base:"buy",   past:"bought",  jp:"買う"},
+    {base:"go",    past:"went",    jp:"行く"},
+    {base:"leave", past:"left",    jp:"去る"},
+    {base:"know",  past:"knew",    jp:"知っている"},
+    {base:"come",  past:"came",    jp:"来る"},
+    {base:"speak", past:"spoke",   jp:"話す"},
+    {base:"make",  past:"made",    jp:"作る"},
+    {base:"sing",  past:"sang",    jp:"歌う"},
+    {base:"hear",  past:"heard",   jp:"聞こえる"},
+  ],
+  2: [
+    {base:"catch", past:"caught",  jp:"つかまえる"},
+    {base:"teach", past:"taught",  jp:"教える"},
+    {base:"think", past:"thought", jp:"思う"},
+    {base:"read",  past:"read",    jp:"読む"},
+    {base:"meet",  past:"met",     jp:"会う"},
+    {base:"drink", past:"drank",   jp:"飲む"},
+    {base:"eat",   past:"ate",     jp:"食べる"},
+    {base:"draw",  past:"drew",    jp:"描く"},
+    {base:"say",   past:"said",    jp:"言う"},
+    {base:"write", past:"wrote",   jp:"書く"},
+  ],
+  3: [
+    {base:"feel",  past:"felt",    jp:"感じる"},
+    {base:"sleep", past:"slept",   jp:"眠る"},
+    {base:"lose",  past:"lost",    jp:"負ける"},
+    {base:"tell",  past:"told",    jp:"人に話す"},
+    {base:"stand", past:"stood",   jp:"立つ"},
+    {base:"spend", past:"spent",   jp:"過ごす"},
+    {base:"take",  past:"took",    jp:"とる"},
+    {base:"see",   past:"saw",     jp:"見る"},
+    {base:"win",   past:"won",     jp:"勝つ"},
+    {base:"give",  past:"gave",    jp:"与える"},
+  ],
+  4: [
+    {base:"cut",   past:"cut",     jp:"切る"},
+    {base:"put",   past:"put",     jp:"置く"},
+    {base:"set",   past:"set",     jp:"準備する"},
+    {base:"get",   past:"got",     jp:"得る"},
+    {base:"sit",   past:"sat",     jp:"座る"},
+    {base:"run",   past:"ran",     jp:"走る"},
+    {base:"swim",  past:"swam",    jp:"泳ぐ"},
+    {base:"do",    past:"did",     jp:"する"},
+    {base:"have",  past:"had",     jp:"持っている"},
+  ],
+};
+const SET_NO = (function(){
+  const n = parseInt(new URLSearchParams(location.search).get('set'), 10);
+  return SETS[n] ? n : 1;                  // 番号がなければ ① を出す
+})();
+const WORDS = SETS[SET_NO];
+const MARK = "①②③④"[SET_NO - 1];
+document.getElementById('ttl').textContent  = '不規則動詞 書き取り ' + MARK + '　過去形';
+document.getElementById('ttl2').textContent = '確認テスト ' + MARK + '（見本を見ないで書く）';
+document.title = '不規則動詞 書き取り ' + MARK;
 
 /* 英語の4線（学校のノートと同じ）をSVGで描く。
    枠線や色は背景ではなく線として描くので、印刷しても消えない。
@@ -130,7 +179,8 @@ document.getElementById('drill').innerHTML = WORDS.map(function(w, i){
 }).join('');
 
 /* 2ページ目：順番を入れ替えて出す（並び順で覚えてしまわないように） */
-const ORDER = [6, 2, 9, 0, 4, 7, 1, 5, 8, 3];
+const ORDER = (SET_NO === 1) ? [6, 2, 9, 0, 4, 7, 1, 5, 8, 3]
+  : WORDS.map(function(_, i){ return (i * 7 + 6) % WORDS.length; });  // 7と語数が割り切れないので全語が1回ずつ出る
 document.getElementById('test').innerHTML = ORDER.map(function(k, i){
   const w = WORDS[k];
   return '<div class="word">'
